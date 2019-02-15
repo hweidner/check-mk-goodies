@@ -1,5 +1,16 @@
 #!/usr/bin/perl
 
+# (c) Harald Weidner, 2019-02-15
+# License: MIT
+#
+# Check_MK local check
+# displays some CPU informations in the monitoring console, gahered by
+# lscpu
+#
+# example output:
+# 0 CPU_Info - AMD Ryzen 7 1700 Eight-Core Processor, 16 CPUs (1/8/2), 1550-3000 MHz, Caches: L1d:32K L1i:64K L2:512K L3:8192K
+# (multiline output stripped)
+
 use strict;
 use warnings;
 
@@ -34,3 +45,4 @@ if(defined $c{'CPU min MHz'} && defined $c{'CPU max MHz'}) {
 }
 
 print "0 CPU_Info - $c{'Model name'}, $c{'CPU(s)'} CPUs$topo$mhz$cache\\n$lscpu\n";
+

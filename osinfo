@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# (c) Harald Weidner, 2019-02-15
+# License: MIT
+#
+# Check_MK local check
+# displays some hardware/OS/kernel information in the monitoring console
+#
+# example output:
+#
+# 0 Uname - Linux darkstar 4.15.0-45-generic #48-Ubuntu SMP Tue Jan 29 16:28:13 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux
+# 0 LSB_Release - Ubuntu 18.04.2 LTS
+# 0 Hostname_IPs - darkstar // 192.168.1.2
+# 0 Kernel_Cmdline - BOOT_IMAGE=/vmlinuz-4.15.0-45-generic root=/dev/mapper/system-ubuntu ro nvidia-drm.modeset=1
+
 if type uname >/dev/null 2>&1 ; then
   echo "0 Uname - $(uname -a)"
 fi
@@ -15,3 +28,4 @@ fi
 if [[ -f /proc/cmdline ]]; then
   echo "0 Kernel_Cmdline - $(cat /proc/cmdline)"
 fi
+

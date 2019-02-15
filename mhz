@@ -1,5 +1,18 @@
 #!/bin/bash
 
-mhz=$(LANG='' lscpu | grep '^CPU MHz:' | awk '{ print $3 }')
+# (c) Harald Weidner, 2019-02-15
+# License: MIT
+#
+# Check_MK local check
+# measure CPU frequency (as reported by lscpu)
+#
+# example output:
+# 0 CPU_MHz mhz=1377.546 CPU speed: 1377.546 MHz
 
-echo "0 CPU_MHz mhz=$mhz CPU speed: $mhz MHz"
+if type lscpu >/dev/null 2>&1 ; then
+  mhz=$(LANG='' lscpu | grep '^CPU MHz:' | awk '{ print $3 }')
+  if [[ "$mhz" != "" ]]; then
+    echo "0 CPU_MHz mhz=$mhz CPU speed: $mhz MHz"
+  fi
+fi
+

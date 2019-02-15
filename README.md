@@ -46,6 +46,9 @@ command and makes it available on the Check_MK console. It displays the
 CPU model, number of topology of virtual processors, minimum and maximum
 CPU frequencies in MHz, and the size of the CPU caches.
 
+The long (multiline) output of the check contains the whole output of the
+lscpu command.
+
 The output of the lscpu script is also rather static, it is usually sufficient
 to cache it for one hour or more.
 
