@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my %c = ();
+my $lscpu = "";
+
+open(IN, "LANG='' lscpu |") || exit 0;
+while(<IN>) {
+  chomp;
+  $lscpu .= "$_\\n";
+  my ($key, $val) = split /:\s+/;
+  $c{$key} = $val;
+}
+close(IN);
+
+my $topo = "";
+if(defined $c{'Socket(s)'} && defined $c{'Core(s) per socket'} && defined $c{'Thread(s) per core'}) {
+  $topo = " ($c{'Socket(s)'}/$c{'Core(s) per socket'}/$c{'Thread(s) per core'})";
+}
+
+my $cache="";
+for my $k (sort keys %c) {
+  $cache .= "$1:$c{$k} " if($k =~ /^(L\d\w?) cache$/);
+}
+$cache = ", Caches: $cache" unless($cache eq "");
+
+my $mhz = "";
+if(defined $c{'CPU min MHz'} && defined $c{'CPU max MHz'}) {
+  my $mhz_min = int($c{'CPU min MHz'});
+  my $mhz_max = int($c{'CPU max MHz'});
+  $mhz = ", $mhz_min-$mhz_max MHz";
+}
+
+print "0 CPU_Info - $c{'Model name'}, $c{'CPU(s)'} CPUs$topo$mhz$cache\\n$lscpu\n";

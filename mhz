@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mhz=$(LANG='' lscpu | grep '^CPU MHz:' | awk '{ print $3 }')
+
+echo "0 CPU_MHz mhz=$mhz CPU speed: $mhz MHz"

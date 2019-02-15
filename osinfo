@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if type uname >/dev/null 2>&1 ; then
+  echo "0 Uname - $(uname -a)"
+fi
+
+if type lsb_release >/dev/null 2>&1 ; then
+  echo "0 LSB_Release - $(lsb_release -ds)"
+fi
+
+if type hostname >/dev/null 2>&1 ; then
+  echo "0 Hostname_IPs - $(hostname -f) // $(hostname -I)"
+fi
+
+if [[ -f /proc/cmdline ]]; then
+  echo "0 Kernel_Cmdline - $(cat /proc/cmdline)"
+fi
