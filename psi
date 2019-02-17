@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+
+# (c) Harald Weidner, 2019-02-16
+# License: MIT
+#
+# Check_MK local check
+# displays cpu/io/memory pressure informations from the new PSI subsystem
+# in Linux >= 4.20.
+#
+# example output:
+# 
+# P PSI_cpu psi_cpu_some_avg10=0.67;50;75;0;100|psi_cpu_some_avg60=26.92;50;75;0;100|psi_cpu_some_avg300=55.92;50;75;0;100 PSI cpu pressure
+# P PSI_memory psi_memory_some_avg10=0.00;50;75;0;100|psi_memory_some_avg60=0.00;50;75;0;100|psi_memory_some_avg300=0.00;50;75;0;100|psi_memory_full_avg10=0.00;25;50;0;100|psi_memory_full_avg60=0.00;25;50;0;100|psi_memory_full_avg300=0.00;25;50;0;100 PSI memory pressure
+# P PSI_io psi_io_some_avg10=0.00;50;75;0;100|psi_io_some_avg60=0.00;50;75;0;100|psi_io_some_avg300=0.00;50;75;0;100|psi_io_full_avg10=0.00;25;50;0;100|psi_io_full_avg60=0.00;25;50;0;100|psi_io_full_avg300=0.00;25;50;0;100 PSI io pressure
+
+use strict;
+use warnings;
+
+for my $f (qw(cpu memory io)) {
+  my $vars;
+  open(IN, "< /proc/pressure/$f") || next;
+  while(<IN>) {
+    if(/^(some|full) avg10=(\d+.\d+) avg60=(\d+.\d+) avg300=(\d+.\d+) total=(\d+)$/) {
+      my ($scope, $avg10, $avg60, $avg300, $total) = ($1, $2, $3, $4, $5);
+      if($scope eq "some") {
+        $vars = "psi_${f}_${scope}_avg10=$avg10;50;75;0;100|psi_${f}_${scope}_avg60=$avg60;50;75;0;100|psi_${f}_${scope}_avg300=$avg300;50;75;0;100";
+      } else {
+        $vars .= "|psi_${f}_${scope}_avg10=$avg10;25;50;0;100|psi_${f}_${scope}_avg60=$avg60;25;50;0;100|psi_${f}_${scope}_avg300=$avg300;25;50;0;100";
+      }
+    }
+  }
+  close(IN);
+  print "P PSI_${f} $vars PSI $f pressure\n";
+}
+
