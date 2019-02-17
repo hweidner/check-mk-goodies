@@ -81,7 +81,7 @@ average pressure (in percent) in the last 10, 60, and 300 seconds.
 The memory and I/O checks give "some" and "full" values, where "some" means
 that at least one process is stalled through memory or I/O pressure, while
 "full" means that all processes are stalled. The CPU check has only "some"
-values, as it is impossible for
+values, as it is impossible that all processes are stalled due to CPU pressure.
 
 See [Tracking pressure-stall information](https://lwn.net/Articles/759781/) and
 [psi: pressure stall information for CPU, memory, and IO v2](https://lwn.net/Articles/759658/)
