@@ -29,3 +29,10 @@ if [[ -f /proc/cmdline ]]; then
   echo "0 Kernel_Cmdline - $(cat /proc/cmdline)"
 fi
 
+if type virt-what >/dev/null 2>&1 ; then
+  virt=$(virt-what | tr '\n' ' ')
+  if [[ -n "$virt" ]]; then
+    echo "0 Hypervisor - Hypervisor(s): $virt(guessed by virt-what)"
+  fi
+fi
+

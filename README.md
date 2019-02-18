@@ -31,6 +31,9 @@ the Check_MK monitoring console. Those are:
   * [hostname](http://man7.org/linux/man-pages/man1/hostname.1.html) output
     about the system name and IP addresses
   * The kernel command line arguments use for booting (from /proc/cmdline)
+  * The hypervisor, if the system is running under a hypervisor or
+    container technology, and the
+    [virt-what](http://people.redhat.com/rjones/virt-what/) tool is installed
 
 The check status is always OK, entries in the monitoring console will never
 get yellow or red.
