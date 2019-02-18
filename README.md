@@ -15,9 +15,9 @@ To use these scripts, you need to install the
 [Linux Agent for Check_MK](https://mathias-kettner.de/cms_agent_linux.html).
 
 Put the scripts under the "local" directory of the Linux agent, which is
-/usr/lib/check_mk_agent/local on most systems. (When using CentOS/Red Hat and
+``/usr/lib/check_mk_agent/local`` on most systems. (When using CentOS/Red Hat and
 installing the agent from the EPEL repositories, the directory is
-/usr/share/check_mk_agent/local.)
+``/usr/share/check-mk-agent/local``.)
 
 osinfo
 ------
