@@ -94,3 +94,17 @@ As the output of this check is very dynamic, it should not be cached by the
 agent (e.g. put it in the local script directory, not one of it's
 subdirectories.)
 
+dockerpull
+----------
+
+This script checks if the currently running Docker containers have updated
+images. To run the script, the images have to be pulled periodically. This
+can be done by a cron job like:
+
+  0 0 * * *  root  docker ps -qa | xargs docker inspect --format '{{.Config.Image}}' | sort -u | xargs -n1 docker pull
+
+The local check compares the ID (SHA hash sum) of the pulled images to the
+image ID of the currently running containers. If a mismatch is found, the
+container name is reported and the status is red. If all containers run
+on current images, the status is green.
+

@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# (c) Harald Weidner, 2019-04-30
+# License: MIT
+#
+# Check_MK local check
+# displays the update status of all currently running docker containers
+# by comparing the image ID of the running container with the ID of
+# the pulled image.
+#
+# The script requires the images to be pulled regularly,
+# e.g. by a cron in /etc/cron.d/dockerpull:
+# 0 0 * * *  root  docker ps -qa | xargs docker inspect --format '{{.Config.Image}}' | sort -u | xargs -n1 docker pull
+#
+# example output:
+# 
+# 0 Docker_Pull - All containers are up-to-date
+
+
+# output of Local Check
+out=""
+
+for cont in $(docker ps -a --format '{{.Names}}'); do
+  # image name
+  im=$(docker inspect --format '{{.Config.Image}}' $cont)
+  # ID (hash) of latest image
+  latest=$(docker image inspect --format "{{.Id}}" $im)
+  # image ID of currently running container
+  current=$(docker inspect --format "{{.Image}}" $cont)
+
+  if [ "$current" != "$latest" ]; then
+    out="$out $cont"
+  fi
+done
+
+if [ -n "$out" ]; then
+  echo "2 Docker_Pull - Docker containers running on outdated images:$out"
+else
+  echo "0 Docker_Pull - All Docker containers run on up-to-date images"
+fi
+
+exit 0
+
