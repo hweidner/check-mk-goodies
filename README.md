@@ -65,6 +65,8 @@ Example output in Check_MK console:
 
 ![lscpu example](img/lscpu.png "lscpu example")
 
+![lscpu multiline example](img/lscpu_multiline.png "lscpu multiline example")
+
 mhz
 ---
 
