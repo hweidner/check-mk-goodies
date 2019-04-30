@@ -43,6 +43,10 @@ to check it once an hour or even less. This can be achieved by putting the
 script in a subdirecory called '3600', where the name denotes the number
 of seconds until a cached output is renewed.
 
+Example output in Check_MK console:
+
+![osinfo example](img/osinfo.png "osinfo example")
+
 lscpu
 -----
 
@@ -56,6 +60,10 @@ lscpu command.
 
 The output of the lscpu script is also rather static, it is usually sufficient
 to cache it for one hour or more.
+
+Example output in Check_MK console:
+
+![lscpu example](img/lscpu.png "lscpu example")
 
 mhz
 ---
@@ -72,6 +80,10 @@ of the mhz value as a diagram.
 Note that the script is usually executed in a series of other scripts/programs
 started by the Linux agent. The measured CPU frequency can therefore be higher
 than the average on the system.
+
+Example output in Check_MK console:
+
+![mhz example](img/mhz.png "mhz example")
 
 psi
 ---
@@ -94,6 +106,10 @@ As the output of this check is very dynamic, it should not be cached by the
 agent (e.g. put it in the local script directory, not one of it's
 subdirectories.)
 
+Example output in Check_MK console:
+
+![psi example](img/psi.png "psi example")
+
 dockerpull
 ----------
 
@@ -107,4 +123,8 @@ The local check compares the ID (SHA hash sum) of the pulled images to the
 image ID of the currently running containers. If a mismatch is found, the
 container name is reported and the status is red. If all containers run
 on current images, the status is green.
+
+Example output in Check_MK console:
+
+![dockerpull example](img/dockerpull.png "dockerpull example")
 
