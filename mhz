@@ -3,7 +3,7 @@
 # (c) Harald Weidner, 2019-02-15
 # License: MIT
 #
-# Check_MK local check
+# Checkmk local check
 # measure CPU frequency (as reported by lscpu)
 #
 # example output:

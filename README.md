@@ -1,18 +1,18 @@
-Check_MK goodies
-================
+Checkmk goodies
+===============
 
-Some useful Linux checks for the [Check_MK](https://mathias-kettner.de)
+Some useful Linux checks for the [Checkmk](https://checkmk.com)
 monitoring system.
 
 Currently, all the checks are
-[Check_MK local checks](https://mathias-kettner.de/cms_localchecks.html).
-They are used together with the Check_MK Linux agent.
+[CheckmkK local checks](https://checkmk.com/cms_localchecks.html).
+They are used together with the Checkmk Linux agent.
 
 Installation
 ------------
 
 To use these scripts, you need to install the
-[Linux Agent for Check_MK](https://mathias-kettner.de/cms_agent_linux.html).
+[Linux Agent for Checkmk](https://checkmk.com/cms_agent_linux.html).
 
 Put the scripts under the "local" directory of the Linux agent, which is
 ``/usr/lib/check_mk_agent/local`` on most systems. (When using CentOS/Red Hat and
@@ -23,7 +23,7 @@ osinfo
 ------
 
 This shell script makes some informations about the Linux OS available to
-the Check_MK monitoring console. Those are:
+the Checkmk monitoring console. Those are:
 
   * [uname](https://linux.die.net/man/1/uname) system and kernel information
   * [lsb_release](https://linux.die.net/man/1/lsb_release) information about the
@@ -43,7 +43,7 @@ to check it once an hour or even less. This can be achieved by putting the
 script in a subdirecory called '3600', where the name denotes the number
 of seconds until a cached output is renewed.
 
-Example output in Check_MK console:
+Example output in Checkmk console:
 
 ![osinfo example](img/osinfo.png "osinfo example")
 
@@ -51,7 +51,7 @@ lscpu
 -----
 
 This Perl script parses the output of the [lscpu](https://linux.die.net/man/1/lscpu)
-command and makes it available on the Check_MK console. It displays the
+command and makes it available on the Checkmk console. It displays the
 CPU model, number of topology of virtual processors, minimum and maximum
 CPU frequencies in MHz, and the size of the CPU caches.
 
@@ -61,7 +61,7 @@ lscpu command.
 The output of the lscpu script is also rather static, it is usually sufficient
 to cache it for one hour or more.
 
-Example output in Check_MK console:
+Example output in Checkmk console:
 
 ![lscpu example](img/lscpu.png "lscpu example")
 
@@ -73,17 +73,17 @@ mhz
 The ''mhz'' handles the "CPU MHz" output of the [lscpu](https://linux.die.net/man/1/lscpu)
 command, which is usually the current frequency of the first processor. On modern
 processors, the frequency is dynamically adjusted according to the system load.
-The output is therefore dynamic, the script should be executed on every Check_MK
+The output is therefore dynamic, the script should be executed on every Checkmk
 agent run.
 
-The output also contains performance data, so Check_MK shows up the history
+The output also contains performance data, so Checkmk shows up the history
 of the mhz value as a diagram.
 
 Note that the script is usually executed in a series of other scripts/programs
 started by the Linux agent. The measured CPU frequency can therefore be higher
 than the average on the system.
 
-Example output in Check_MK console:
+Example output in Checkmk console:
 
 ![mhz example](img/mhz.png "mhz example")
 
@@ -108,7 +108,7 @@ As the output of this check is very dynamic, it should not be cached by the
 agent (e.g. put it in the local script directory, not one of it's
 subdirectories.)
 
-Example output in Check_MK console:
+Example output in Checkmk console:
 
 ![psi example](img/psi.png "psi example")
 
@@ -126,7 +126,7 @@ image ID of the currently running containers. If a mismatch is found, the
 container name is reported and the status is red. If all containers run
 on current images, the status is green.
 
-Example output in Check_MK console:
+Example output in Checkmk console:
 
 ![dockerpull example](img/dockerpull.png "dockerpull example")
 

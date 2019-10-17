@@ -3,7 +3,7 @@
 # (c) Harald Weidner, 2019-02-16
 # License: MIT
 #
-# Check_MK local check
+# Checkmk local check
 # displays cpu/io/memory pressure informations from the new PSI subsystem
 # in Linux >= 4.20.
 #
