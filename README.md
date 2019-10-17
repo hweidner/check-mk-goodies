@@ -5,7 +5,7 @@ Some useful Linux checks for the [Checkmk](https://checkmk.com)
 monitoring system.
 
 Currently, all the checks are
-[CheckmkK local checks](https://checkmk.com/cms_localchecks.html).
+[Checkmk local checks](https://checkmk.com/cms_localchecks.html).
 They are used together with the Checkmk Linux agent.
 
 Installation
