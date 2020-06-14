@@ -23,9 +23,9 @@ for my $f (qw(cpu memory io)) {
     if(/^(some|full) avg10=(\d+.\d+) avg60=(\d+.\d+) avg300=(\d+.\d+) total=(\d+)$/) {
       my ($scope, $avg10, $avg60, $avg300, $total) = ($1, $2, $3, $4, $5);
       if($scope eq "some") {
-        $vars = "psi_${f}_${scope}_avg10=$avg10;50;75;0;100|psi_${f}_${scope}_avg60=$avg60;50;75;0;100|psi_${f}_${scope}_avg300=$avg300;50;75;0;100";
+        $vars = "psi_${f}_${scope}_avg60=$avg60;50;75;0;100|psi_${f}_${scope}_avg300=$avg300;50;75;0;100";
       } else {
-        $vars .= "|psi_${f}_${scope}_avg10=$avg10;25;50;0;100|psi_${f}_${scope}_avg60=$avg60;25;50;0;100|psi_${f}_${scope}_avg300=$avg300;25;50;0;100";
+        $vars .= "|psi_${f}_${scope}_avg60=$avg60;25;50;0;100|psi_${f}_${scope}_avg300=$avg300;25;50;0;100";
       }
     }
   }

@@ -93,7 +93,9 @@ psi
 This local check script handles the new pressure stall information (PSI)
 in the Linux kernel >= 4.20. It generated three check items for CPU, memory
 and I/O pressure each. Each item output three performance values about the
-average pressure (in percent) in the last 10, 60, and 300 seconds.
+average pressure (in percent) in the last 60 and 300 seconds. (The PSI also
+contain a value about the last 10 seconds, but the check omits them, due to the
+default Checkmk check interval of 60s.)
 
 The memory and I/O checks give "some" and "full" values, where "some" means
 that at least one process is stalled through memory or I/O pressure, while
@@ -111,6 +113,9 @@ subdirectories.)
 Example output in Checkmk console:
 
 ![psi example](img/psi.png "psi example")
+
+(Note that the image shows an older version of this check, containing also
+10s average values.)
 
 dockerpull
 ----------
