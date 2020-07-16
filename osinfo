@@ -18,7 +18,7 @@ if type uname >/dev/null 2>&1 ; then
 fi
 
 if type lsb_release >/dev/null 2>&1 ; then
-  echo "0 LSB_Release - $(lsb_release -ds)"
+  echo "0 LSB_Release - $(lsb_release -ds) ($(lsb_release -cs))"
 fi
 
 if type hostname >/dev/null 2>&1 ; then
