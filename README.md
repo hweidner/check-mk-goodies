@@ -218,3 +218,7 @@ executable (``chmod 755 k8s``). The configuration values KUBECTL und KUBECONFIG
 might have to be adapted to the own installation; in the current version, they
 refer to a MicroK8s installation from the snap repository of an Ubuntu system.
 
+The k8s Check was developed and tested using Kubernetes (and kubectl) version
+1.19.0 and 1.18.8. Details might differ with other versions, thus some adaptions
+might be needed.
+

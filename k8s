@@ -275,11 +275,12 @@ sub mon_statefulsets {
 	my $count = 0;
 	while(<K>) {
 		chomp;
-		my ($ns, $name, $desired, $current, $age) = split(/\s+/, $_);
+		my ($ns, $name, $ready_desired, $age) = split(/\s+/, $_);
+		my ($ready, $desired) = split( m#/#, $ready_desired);
 		my $st = 0;
-		$st = 1 if($current != $desired);
-		$st = 2 if($desired > 0 && $current == 0);
-		push @{$sta_ns{$ns}}, { "name"=>$name, "status"=>$st, "desc"=>"desired: $desired, current: $current, age: $age" };
+		$st = 1 if($ready != $desired);
+		$st = 2 if($desired > 0 && $ready == 0);
+		push @{$sta_ns{$ns}}, { "name"=>$name, "status"=>$st, "desc"=>"desired: $desired, ready: $ready, age: $age" };
 		$count++;
 	}
 	close(K);
