@@ -121,9 +121,9 @@ Example output in Checkmk console:
 dockerpull
 ----------
 
-This script checks if the currently running Docker containers have updated
-images. To run the script, the images have to be pulled periodically. This
-can be done by a cron job like:
+This script checks if the currently running [Docker](https://www.docker.com/)
+containers have updated images. To run the script, the images have to be pulled
+periodically. This can be done by a cron job like:
 
 	0 0 * * *  root  docker ps -qa | xargs docker inspect --format '{{.Config.Image}}' | sort -u | xargs -n1 docker pull
 
@@ -143,7 +143,8 @@ You might consider using the ``k8s`` local check explained below.
 k8s (Kubernetes)
 ----------------
 
-The k8s local check script is an alternative approach to Kubernetes monitoring.
+The k8s local check script is an alternative approach to
+[Kubernetes](https://kubernetes.io/) monitoring.
 
 The Checkmk monitoring system (starting with version 1.5.0p12) already offers
 a comprehensive monitoring solution for Kubernetes clusters, implemented by a
@@ -181,11 +182,18 @@ the informations on all nodes, namespaces, pods, services, deployments, ingresse
 statefulsets, daemonsets, and replicasets. The output consists of a quite constant
 set of check items:
 
-  * one item for each namespace
-  * one item for each node
-  * one item each for a summary of pods, pods by node, and pods by namespace
-  * one item each for a summary of all services, deployments, ingresses,
-    statefulsets, daemonsets, and replicasets
+  * one item for each
+    [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
+  * one item for each [node](https://kubernetes.io/docs/concepts/architecture/nodes/)
+  * one item each for a summary of [pods](https://kubernetes.io/docs/concepts/workloads/pods/),
+    pods by node, and pods by namespace
+  * one item each for a summary of all
+    [services](https://kubernetes.io/docs/concepts/services-networking/service/),
+    [deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/),
+    [ingresses](https://kubernetes.io/docs/concepts/services-networking/ingress/),
+    [statefulsets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/),
+    [daemonsets](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/), and
+    [replicasets](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)
   * one item for each namespace and its services, deployments, ingresses,
     statefulsets, daemonsets, and replicasets
 
