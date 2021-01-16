@@ -13,6 +13,8 @@ use warnings;
 # Configuration
 #
 
+# This configuration is for a MicroK8s Snap installation on Ubuntu 20.04 LTS.
+# Adapt for your needs!
 my $KUBECONFIG="/var/snap/microk8s/current/credentials/client.config";
 my $KUBECTL="/snap/bin/microk8s.kubectl";
 
