@@ -8,6 +8,11 @@ Currently, all the checks are
 [Checkmk local checks](https://checkmk.com/cms_localchecks.html).
 They are used together with the Checkmk Linux agent.
 
+**Some of these scripts currently do not work with Checkmk 2.0, just with
+Checkmk 1.6 or older.** This is the case for the `lscpu` and `k8s` checks,
+which use long output (multiline).
+See below on Checkmk 2.0 and local scripts with multiline output.
+
 Installation
 ------------
 
@@ -229,4 +234,25 @@ refer to a MicroK8s installation from the snap repository of an Ubuntu system.
 The k8s Check was developed and tested using Kubernetes (and kubectl) version
 1.19.0 and 1.18.8. Details might differ with other versions, thus some adaptions
 might be needed.
+
+## Notes on Checkmk 2.0
+
+When using log output (multiline) in Local Checks, the format required by Checkmk
+has changed from Check 1.6 or older to Checkmk 2.0. In Checkmk up to 1.6, a verbatim
+`\n` (backslash and n) was required to start the long output and to separate lines.
+E.g. the following was a legal Local Check script:
+
+	#!/bin/bash
+	echo '1 TestCheck - Test description\nTest multiline output\nsecond line'
+
+Starting with Checkmk 2.0, two backslash characters are required:
+
+	#!/bin/bash
+	echo '1 TestCheck - Test description\\nTest multiline output\\nsecond line'
+
+Although being consistent with the
+[documentation](https://docs.checkmk.com/master/en/localchecks.html#_multi_line_outputs),
+this is a regression introduced in Checkmk 2.0. I believe that this is a bug in
+Checkmk 2.0, and have filed a bug report. Unless this issue is resolved, I'll
+leave the scripts as they are.
 
