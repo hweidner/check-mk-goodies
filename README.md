@@ -9,7 +9,7 @@ Currently, all the checks are
 They are used together with the Checkmk Linux agent.
 
 **Some of these scripts currently do not work with Checkmk 2.0.0 and
-Checkmk 2.0.0p1, due tu a bug in the Checkmk Agent. Use the lastest
+Checkmk 2.0.0p1, due to a bug in the Checkmk Agent. Use the lastest
 Checkmk version 2.0.0p2 and ensure to install the latest Linux Agent
 on all monitored systems, or use Checkmk 1.6 or older.**
 This is the case for the `lscpu` and `k8s` checks, which use long
