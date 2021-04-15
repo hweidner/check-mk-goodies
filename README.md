@@ -8,9 +8,12 @@ Currently, all the checks are
 [Checkmk local checks](https://checkmk.com/cms_localchecks.html).
 They are used together with the Checkmk Linux agent.
 
-**Some of these scripts currently do not work with Checkmk 2.0, just with
-Checkmk 1.6 or older.** This is the case for the `lscpu` and `k8s` checks,
-which use long output (multiline).
+**Some of these scripts currently do not work with Checkmk 2.0.0 and
+Checkmk 2.0.0p1, due tu a bug in the Checkmk Agent. Use the lastest
+Checkmk version 2.0.0p2 and ensure to install the latest Linux Agent
+on all monitored systems, or use Checkmk 1.6 or older.**
+This is the case for the `lscpu` and `k8s` checks, which use long
+output (multiline).
 See below on Checkmk 2.0 and local scripts with multiline output.
 
 Installation
@@ -237,22 +240,22 @@ might be needed.
 
 ## Notes on Checkmk 2.0
 
+There was a bug in the Linux Agent of Checkmk versions 2.0.0 and 2.0.0p1.
 When using log output (multiline) in Local Checks, the format required by Checkmk
-has changed from Check 1.6 or older to Checkmk 2.0. In Checkmk up to 1.6, a verbatim
-`\n` (backslash and n) was required to start the long output and to separate lines.
+has changed from Check 1.6 or older to Checkmk 2.0.0 and 2.0.0p1.
+In Checkmk up to 1.6, a verbatim `\n` (backslash and n) was required to start
+the long output and to separate lines.
 E.g. the following was a legal Local Check script:
 
 	#!/bin/bash
 	echo '1 TestCheck - Test description\nTest multiline output\nsecond line'
 
-Starting with Checkmk 2.0, two backslash characters are required:
+With Checkmk 2.0.0 and 2.0.0p1, two backslash characters were required:
 
 	#!/bin/bash
 	echo '1 TestCheck - Test description\\nTest multiline output\\nsecond line'
 
-Although being consistent with the
-[documentation](https://docs.checkmk.com/master/en/localchecks.html#_multi_line_outputs),
-this is a regression introduced in Checkmk 2.0. I believe that this is a bug in
-Checkmk 2.0, and have filed a bug report. Unless this issue is resolved, I'll
-leave the scripts as they are.
+This bug has been fixed in Checkmk version 2.0.0p2. It was reverted to the
+old behaviour up to Checkmk 1.6. Be sure to install the Checkmk Agent that
+comes with server 2.0.0p2 on all monitored systems.
 
