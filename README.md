@@ -1,5 +1,4 @@
-Checkmk goodies
-===============
+# Checkmk goodies
 
 Some useful Linux checks for the [Checkmk](https://checkmk.com)
 monitoring system.
@@ -16,8 +15,7 @@ This is the case for the `lscpu` and `k8s` checks, which use long
 output (multiline).
 See below on Checkmk 2.0 and local scripts with multiline output.
 
-Installation
-------------
+## Installation
 
 To use these scripts, you need to install the
 [Linux Agent for Checkmk](https://checkmk.com/cms_agent_linux.html).
@@ -28,8 +26,7 @@ installing the agent from the EPEL repositories, the directory is
 ``/usr/share/check-mk-agent/local``.) The scripts must be executable by the
 Checkmk agent (e.g. ``chmod 755 <Checkname>``).
 
-osinfo
-------
+## osinfo
 
 This shell script makes some informations about the Linux OS available to
 the Checkmk monitoring console. Those are:
@@ -56,8 +53,7 @@ Example output in Checkmk console:
 
 ![osinfo example](img/osinfo.png "osinfo example")
 
-lscpu
------
+## lscpu
 
 This Perl script parses the output of the [lscpu](https://linux.die.net/man/1/lscpu)
 command and makes it available on the Checkmk console. It displays the
@@ -76,8 +72,7 @@ Example output in Checkmk console:
 
 ![lscpu multiline example](img/lscpu_multiline.png "lscpu multiline example")
 
-mhz
----
+## mhz
 
 The ''mhz'' handles the "CPU MHz" output of the [lscpu](https://linux.die.net/man/1/lscpu)
 command, which is usually the current frequency of the first processor. On modern
@@ -96,8 +91,7 @@ Example output in Checkmk console:
 
 ![mhz example](img/mhz.png "mhz example")
 
-psi
----
+## psi
 
 This local check script handles the new pressure stall information (PSI)
 in the Linux kernel >= 4.20. It generated three check items for CPU, memory
@@ -126,8 +120,18 @@ Example output in Checkmk console:
 (Note that the image shows an older version of this check, containing also
 10s average values.)
 
-dockerpull
-----------
+## wireguard
+
+This is a local script to monitor [Wireguard VPN](https://www.wireguard.com/)
+interfaces and peers. For each interface, a check item is displayed. The state
+is always OK. The check description shows the listening port number, the public
+key, and the number of configured and active peers.
+
+The performance value of this check contains the number of active peers.
+A peer is considered active if the latest valid handshake is not older than
+five minutes.
+
+## dockerpull
 
 This script checks if the currently running [Docker](https://www.docker.com/)
 containers have updated images. To run the script, the images have to be pulled
@@ -148,8 +152,7 @@ This script should not be used on hosts that are part of a Kubernetes cluster.
 On such hosts, the docker containers are managed and kept up-to-date by Kubernetes.
 You might consider using the ``k8s`` local check explained below.
 
-k8s (Kubernetes)
-----------------
+## k8s (Kubernetes)
 
 The k8s local check script is an alternative approach to
 [Kubernetes](https://kubernetes.io/) monitoring.

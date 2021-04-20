@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+
+# (c) Harald Weidner, 2021-04-20
+# License: MIT
+#
+# Checkmk local check for Wireguard monitoring
+#
+# example input:
+# # wg show all dump
+# wg0  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=  51820  off
+# wg0  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=  (none)  1.2.3.4:5678  192.168.1.2/32  1618883537  537904  1876544  off
+#
+# From the wg manpage:
+# If dump is specified, then several lines are printed; the first contains
+# in order separated by tab: private-key, public-key, listen-port, fwmark. Subsequent lines are printed  for  each  peer
+# and  contain  in order separated by tab: public-key, preshared-key, endpoint, allowed-ips, latest-handshake, transfer-
+# rx, transfer-tx, persistent-keepalive.
+#
+# example outout:
+# 0 Wireguard_wg0 active=2 Wireguard interface wg0: Port 51820, 2/5 active peers, PubKey xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=
+
+use strict;
+use warnings;
+
+my %WG = ();
+
+open(WG, "/usr/bin/wg show all dump |") || die;
+while(<WG>) {
+	chomp;
+	if(/^(\w+)\s+[\w\/\+]+=\s+([\w\/\+]+=)\s+(\d+)\s/) {
+		# Wireguard interface
+		my ($if, $pubkey, $port) = ($1, $2, $3);
+		$WG{$if} = {
+			if     => $if,
+			pubkey => $pubkey,
+			port   => $port,
+			count  => 0,
+			active => 0,
+		};
+	} else {
+		# Peers
+		my ($if, $pubkey, $psk, $endpoint, $allowedips, $handshake, $rx, $tx, $keepalive) = split(/\s+/, $_);
+		$WG{$if}->{"count"}++;
+		$WG{$if}->{"active"}++ if($handshake != 0 && time - $handshake <= 300);
+	}
+}
+close(WG);
+
+for my $if (sort keys %WG) {
+	my $wg = $WG{$if};
+	print "0 Wireguard_$if active=$wg->{'active'} Wireguard interface $if: Port $wg->{'port'}, $wg->{'active'}/$wg->{'count'} active peers, PubKey $wg->{'pubkey'}\n";
+}
+
