@@ -11,8 +11,6 @@ They are used together with the Checkmk Linux agent.
 Checkmk 2.0.0p1, due to a bug in the Checkmk Agent. Use the lastest
 Checkmk version 2.0.0p2 and ensure to install the latest Linux Agent
 on all monitored systems, or use Checkmk 1.6 or older.**
-This is the case for the `lscpu` and `k8s` checks, which use long
-output (multiline).
 See below on Checkmk 2.0 and local scripts with multiline output.
 
 ## Installation
@@ -119,6 +117,20 @@ Example output in Checkmk console:
 
 (Note that the image shows an older version of this check, containing also
 10s average values.)
+
+## yum_updates
+
+On a CentOS, Red Hat, Oracle Linux or similar system with the
+[yum](https://en.wikipedia.org/wiki/Yum_(software)) command installed,
+this script checks for available security updates. The state is CRIT (red)
+if there are pending security updates, and OK (green) otherwise.
+
+The check consumes a small but measureable CPU load. I'd recommend to put it
+in a subdirectory named 900, so the check is executed only once in 15 minutes.
+
+Note that Checkmk comes with an agent plugin for APT (Debian/Ubuntu) security
+updates. It needs to be installed in the `plugins` subdirectory of the Checkmk.
+That's why the local check here does not consider Debian/Ubuntu systems.
 
 ## wireguard
 
