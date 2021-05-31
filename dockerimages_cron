@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# (c) Harald Weidner, 2019-05-11
+# License: MIT
+#
+# This is the cron job for Check_MK local check dockerimages.
+#
+# Put this file in /etc/cron.hourly and make it executable, or set
+# up a separate cron job to run it regularly.
+#
+# Ths script stores the image repo digests of the current versions of all
+# existing Docker container's images and stores them in the cache file.
+#
+# The script requires the tools skopeo and jq to be installed under /usr/bin.
+#
+# example output
+# Format: Container name - Image name - Image ID - Digest on Registry
+# adminer adminer sha256:0efd92e87a0eb4715c172bb6e08634bc7bdd6668916e9fc15a3517543fcfe014 sha256:37fda822ea8c2009b9d5f72672b539e16c39eb5ee87d5b9431436ea36dc5bb62
+# portainer portainer/portainer sha256:19d07168491a3f9e2798a9bed96544e34d57ddc4757a4ac5bb199dea896c87fd sha256:d6cc2c20c0af38d8d557ab994c419c799a10fe825e4aa57fea2e2e507a13747d
+
+CACHEDIR=/var/local/cache
+CACHE=$CACHEDIR/dockerimages.cache
+NEW=$CACHE.new
+
+if [[ ! -x /usr/bin/skopeo ]]; then
+  echo "dockerimg_cron requires the skopeo tool to be installed."
+  exit 1
+fi
+
+if [[ ! -x /usr/bin/jq ]]; then
+  echo "dockerimg_cron requires the jq tool to be installed."
+  exit 1
+fi
+
+test -f $NEW && exit 0   # another instance is running
+touch $NEW
+
+[[ -d $CACHEDIR ]] || mkdir -p $CACHEDIR
+ 
+for container in $(docker ps -a --format '{{.Names}}'); do
+  read image_name image_id < <(docker inspect --format '{{.Config.Image}} {{.Image}}' $container)
+  repodigest=$(/usr/bin/skopeo inspect docker://$image_name | jq -r .Digest)
+  if [[ -n "$repodigest" ]]; then
+    echo "$container $image_name $image_id $repodigest"
+  fi
+done >> $NEW
+
+mv $NEW $CACHE
+
+exit 0
+

@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# (c) Harald Weidner, 2019-05-03
+# License: MIT
+#
+# Checkmk local check
+# Displays the update status of all currently running docker containers
+# by comparing the image digest of the running container with the (cached)
+# digest in the container registry.
+#
+# example output:
+# 
+# 0 Docker_Images - All Docker containers run on up-to-date images
+
+# Cache file (filled by cron job dockerinspect.sh)
+CACHE=/var/local/cache/dockerimages.cache
+
+# Output of Local Check
+out=""
+
+while read container image_name image_id repodigest; do
+  # skip check if container does not exist
+  if [[ -n "$(docker ps -a -q -f name=$cont)" ]]; then
+
+    # get image name and currently used image id of running container
+    read cur_image_name cur_image_id < <(docker inspect --format '{{.Config.Image}} {{.Image}}' $container)
+
+    # skip check if image name does not match cache file
+    if [[ $image_name != $cur_image_name ]]; then
+      continue
+    fi
+
+    # search latest image id (from cache) in digests of currently used image
+    found=0
+    for current in $(docker image inspect --format '{{join .RepoDigests " "}}' $cur_image_id); do
+      current=${current##*@}  # strip container name
+      if [[ $current = $repodigest ]]; then
+        found=1;
+      fi
+    done
+
+    # report container if image digest was not found
+    if [[ $found -eq 0 ]]; then
+      out="$out $container"
+    fi
+  fi
+done < $CACHE
+
+# Print Checkmk local script output
+if [[ -n $out ]]; then
+  echo "2 Docker_Images - Docker containers running on outdated images:$out"
+else
+  echo "0 Docker_Images - All Docker containers run on up-to-date images"
+fi
+
+exit 0
+

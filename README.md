@@ -143,24 +143,79 @@ The performance value of this check contains the number of active peers.
 A peer is considered active if the latest valid handshake is not older than
 five minutes.
 
-## dockerpull
+## dockerimages (Local check and Cron job)
 
-This script checks if the currently running [Docker](https://www.docker.com/)
-containers have updated images. To run the script, the images have to be pulled
-periodically. This can be done by a cron job like:
+These scripts check wether the running (or stopped) Docker containers run on
+current or outdated images. The status is OK if all containers use current
+images, and CRIT if at least one container runs on an image where a newer
+version is available in the container registry.
 
-	0 0 * * *  root  docker ps -qa | xargs docker inspect --format '{{.Config.Image}}' | sort -u | xargs -n1 docker pull
+The check consists of two scripts that must be used together:
 
-The local check compares the ID (SHA hash sum) of the pulled images to the
-image ID of the currently running containers. If a mismatch is found, the
-container name is reported and the status is red. If all containers run
-on current images, the status is green.
+  * a cron job that fetches the current repository digests of all used docker
+    images and stores them in a cache file, and
+  * a Checkmk Local Check thats matches the images of the available containers
+    with the cached repodigests and creates the status output.
+
+The script job `dockerimages_cron` needs to be run by cron, e.g. every couple
+of hours. You can put it into the `/etc/cron.hourly` directory, or create a
+separate cron job for it. The latter has the advantage that the job itselves
+can be monitored with the ``mk-job`` utility:
+
+	# file /etc/cron.d/dockerimages
+	#
+	# cache the repodigests every two hours
+	15 */2 * * *  root  /usr/bin/mk-job dockerimages /root/bin/dockerimages_cron
+
+The script requires the tools `skopeo` and `jq` to be installed under `/usr/bin`.
+Install them with the tools of your Linux distribution. For Debian Linux, you
+might need to add the package sources of the upcomig `bullseye` release.
+
+This script `dockerimages` should be put in a subdirectory of the Local Check
+directory, e.g. `300/dockerimages` to run it every five minutes. It reads the
+cached repository digests and verifies the running containers against it.
 
 Example output in Checkmk console:
 
 ![dockerpull example](img/dockerpull.png "dockerpull example")
 
-This script should not be used on hosts that are part of a Kubernetes cluster.
+When the check finds an outdated container, it needs to be recreated. For
+this, pull the new image, stop and destroy the container, and start it again:
+
+	# docker pull foo_image
+	# docker stop foo_container
+	# docker rm foo_container
+	# docker run --name foo container ... foo_image
+
+Note that the check skips containers which do not yet have an entry in the
+cache file, or where the container name is reused using an other image than
+the cached one. The container will start to be checked after the next run
+of the cron job.
+
+Caveats:
+
+From time to time, it happens that an image gets a new repository digest
+although its content did not change. In this case, the `docker pull`
+command prints the output "Image is already up to date". In this case, it
+is not neccessary to recreate the container; the Checkmk message will
+disappear after the next check.
+
+You can view such images with the docker command:
+
+	# root@jadis:/var/local/cache# docker images --digests
+	REPOSITORY  TAG       DIGEST                                                                    IMAGE ID       CREATED        SIZE
+	[...]
+	nextcloud   latest    sha256:6a80db1ed397cccae7f121a0c4aa8b65ec90c0ccc244f49861e7feacf42c2491   226698e20b65   5 days ago     868MB
+	nextcloud   latest    sha256:6c4945e1e59fa0910306f3d3e04eaf088c92632e62e0bfd1e97b8bbd95411606   226698e20b65   5 days ago     868MB
+	nextcloud   latest    sha256:b565e6133a900611492b62f9f359b225c08f144722904b6f09c1ecdb6ea798ac   226698e20b65   5 days ago     868MB
+	nextcloud   latest    sha256:c481a4f63a631902c78b9c9147260209447903306c9f42556d99b90c0475829d   226698e20b65   5 days ago     868MB
+	[...]
+
+This is in fact the same image (same image ID, creation date and size), referenced
+by four distinct repository digests. I believe this happens when a rebuilt image
+that has not actually changed get uploaded again.
+
+This scripts should not be used on hosts that are part of a Kubernetes cluster.
 On such hosts, the docker containers are managed and kept up-to-date by Kubernetes.
 You might consider using the ``k8s`` local check explained below.
 
