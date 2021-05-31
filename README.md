@@ -177,7 +177,7 @@ cached repository digests and verifies the running containers against it.
 
 Example output in Checkmk console:
 
-![dockerpull example](img/dockerpull.png "dockerpull example")
+![dockerimages example](img/dockerimages.png "dockerimages example")
 
 When the check finds an outdated container, it needs to be recreated. For
 this, pull the new image, stop and destroy the container, and start it again:
@@ -213,7 +213,7 @@ You can view such images with the docker command:
 
 This is in fact the same image (same image ID, creation date and size), referenced
 by four distinct repository digests. I believe this happens when a rebuilt image
-that has not actually changed get uploaded again.
+that has not actually changed gets uploaded again.
 
 This scripts should not be used on hosts that are part of a Kubernetes cluster.
 On such hosts, the docker containers are managed and kept up-to-date by Kubernetes.
