@@ -128,9 +128,10 @@ if there are pending security updates, and OK (green) otherwise.
 The check consumes a small but measureable CPU load. I'd recommend to put it
 in a subdirectory named 900, so the check is executed only once in 15 minutes.
 
-Note that Checkmk comes with an agent plugin for APT (Debian/Ubuntu) security
-updates. It needs to be installed in the `plugins` subdirectory of the Checkmk.
-That's why the local check here does not consider Debian/Ubuntu systems.
+Note that Checkmk comes with agent plugins for APT (Debian/Ubuntu) and Zypper
+(SUSE) security updates. They just need to be installed in the `plugins`
+subdirectory of the Checkmk agent. That's why the local check here does not
+consider Debian/Ubuntu or SUSE systems.
 
 ## wireguard
 
