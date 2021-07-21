@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+
+# (c) Harald Weidner, 2021-07-21
+# License: MIT
+#
+# Checkmk local check for keepalived monitoring
+# displays the state of each VRRP instance in a HA cluster with keepalived
+# The check state is OK for VRRP states MASTER or BACKUP, CRIT for FAULT,
+# and UNKNOWN otherwise.
+#
+# example output:
+# 0 Keepalived_VRRP_VI_1 - VRRP instance VI_1 is in state BACKUP.
+
+use strict;
+use warnings;
+
+for my $file (</var/run/keepalived.*.*.state>) {
+	open(IN, $file) || next;
+	while(<IN>) {
+		chomp;
+		my ($type, $name, $state) = split(":", $_);
+		next if($type ne "INSTANCE");
+
+		my $st;
+		if($state =~ m/^(MASTER|BACKUP)$/)  { $st = 0; }
+		elsif($state eq "FAULT")            { $st = 2; }
+		else                                { $st = 3; }
+
+		print "$st Keepalived_VRRP_$name - VRRP instance $name is in state $state.\n";
+	}
+	close(IN);
+}
+
+exit 0;
+

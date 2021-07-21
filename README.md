@@ -7,11 +7,10 @@ Currently, all the checks are
 [Checkmk local checks](https://checkmk.com/cms_localchecks.html).
 They are used together with the Checkmk Linux agent.
 
-**Some of these scripts currently do not work with Checkmk 2.0.0 and
-Checkmk 2.0.0p1, due to a bug in the Checkmk Agent. Use the lastest
-Checkmk version 2.0.0p2 and ensure to install the latest Linux Agent
-on all monitored systems, or use Checkmk 1.6 or older.**
-See below on Checkmk 2.0 and local scripts with multiline output.
+**Some of these scripts do not work with Checkmk 2.0.0 and 2.0.0p1, due to
+a bug in the "local" check plugin.**
+Use Checkmk version 2.0.0p2 or newer, and ensure to install the latest Linux
+agent on all monitored systems, or use Checkmk 1.6 or older.
 
 ## Installation
 
@@ -143,6 +142,40 @@ key, and the number of configured and active peers.
 The performance value of this check contains the number of active peers.
 A peer is considered active if the latest valid handshake is not older than
 five minutes.
+
+## keepalived (local check and notify script)
+
+Checkmk has support for monitoring the states of keepalived VRRP instances.
+However, it does only work when monitoring hosts with SNMP. Under Linux,
+working with the Checkmk Linux agent is generally the preferred approach,
+because it supports more checks right out of the box, and SNMP has security
+and stability (timing) implications.
+
+This check script offers an alternate approach to keepalived monitoring. As a
+local check, it runs with the Checkmk Linux agent and does not require SNMP to
+be active. The check comes with two files, a keepalived notification script and
+a Checkmk local check. Some configuration is needed to get it running: a
+keepalived instance notification script is added to notify the VRRP instance
+state into a file under /var/run, and the local check reads it from here.
+
+  1. In the keepalived configuration file `/etc/keepalived/keepalived.conf`,
+     put the line `notify /etc/keepalived/keepalive_notify` into each
+     VRRP_instance block that should be monitored.
+  2. Copy the shell script `keepalived_notify` into the directory `/etc/keepalived/`
+     and make it executable (`chmod 755 /etc/keepalived/keepalived_notify`).
+  3. Copy the Perl script `keepalived` into the Checkmk agent local check
+     directory (typically `/usr/lib/check_mk_agent/local`) and make it executable.
+  4. Restart the keepalived service with `systemctl restart keepalived.service`.
+
+The checks should now appear in the Checkmk console, one for each VRRP instance.
+
+![keepalived example](img/keepalived.png "keepalived example")
+
+Caveats:
+
+When manually deleting a VRRP instance from the keepalived config file,
+its state file keeps lying around under /var/run. Delete it manually, or reboot
+the machine to get the monitoring right again.
 
 ## dockerimages (Local check and Cron job)
 
@@ -308,25 +341,4 @@ refer to a MicroK8s installation from the snap repository of an Ubuntu system.
 The k8s Check was developed and tested using Kubernetes (and kubectl) version
 1.19.0 and 1.18.8. Details might differ with other versions, thus some adaptions
 might be needed.
-
-## Notes on Checkmk 2.0
-
-There was a bug in the Linux Agent of Checkmk versions 2.0.0 and 2.0.0p1.
-When using log output (multiline) in Local Checks, the format required by Checkmk
-has changed from Check 1.6 or older to Checkmk 2.0.0 and 2.0.0p1.
-In Checkmk up to 1.6, a verbatim `\n` (backslash and n) was required to start
-the long output and to separate lines.
-E.g. the following was a legal Local Check script:
-
-	#!/bin/bash
-	echo '1 TestCheck - Test description\nTest multiline output\nsecond line'
-
-With Checkmk 2.0.0 and 2.0.0p1, two backslash characters were required:
-
-	#!/bin/bash
-	echo '1 TestCheck - Test description\\nTest multiline output\\nsecond line'
-
-This bug has been fixed in Checkmk version 2.0.0p2. It was reverted to the
-old behaviour up to Checkmk 1.6. Be sure to install the Checkmk Agent that
-comes with server 2.0.0p2 on all monitored systems.
 

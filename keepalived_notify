@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# (c) Harald Weidner, 2021-07-21
+# License: MIT
+#
+# Keepalived notify script
+# saves the state of each VRRP instance in a HA cluster with keepalived
+# to a file under /var/run.
+#
+# example output:
+# INSTANCE:VI_1:BACKUP
+
+echo $1:$2:$3 > /var/run/keepalived.$1.$2.state
+
