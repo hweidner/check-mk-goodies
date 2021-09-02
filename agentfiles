@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# (c) Harald Weidner, 2021-09-02
+# License: MIT
+#
+# Checkmk local check
+# Checks the sizes of cached Checkmk agent files in a Checkmk size.
+# The status is WARN or CRIT if at least one cached agent file is
+# greater than the warn or crit thresholds
+#
+# example output:
+# 
+# 2 Checkmk_Agent_Files_default - 1 huge and 3 large cached agent files (warn/crit at 2MB/16MB): server1 server2 server3 server4
+
+
+# Keep last command in pipe in current shell
+shopt -s lastpipe
+
+# Thresholds for agent cache file size (warn/crit). Adjust to your needs.
+WARN=$((2 * 1024 * 1024))
+WARNSIZE=2MB
+CRIT=$((16 * 1024 * 1024 ))
+CRITSIZE=16MB
+
+cd /opt/omd/sites || exit 0
+
+for site in *; do
+  cd $site/tmp/check_mk/cache || continue
+  status=0
+  critcount=0
+  criticals=""
+  warncount=0
+  warnings=""
+
+  /usr/bin/stat -c "%s %n" * | while read size name; do
+    if [[ $size -gt $CRIT ]]; then
+      critcount=$((critcount + 1))
+      criticals="$criticals $name"
+      status=2
+    elif [[ $size -gt $WARN ]]; then
+      warncount=$((warncount + 1))
+      warnings="$warnings $name"
+      [[ $status -eq 0 ]] && status=1
+    fi
+  done
+
+  case $status in
+    0) echo "0 Checkmk_Agent_Files_$site - No huge cached agent files" ;;
+    1) echo "1 Checkmk_Agent_Files_$site - $warncount large cached agent files (warn >$WARNSIZE):$warnings" ;;
+    2) echo "2 Checkmk_Agent_Files_$site - $critcount huge and $warncount large cached agent files (warn/crit at $WARNSIZE/$CRITSIZE):$criticals$warnings" ;;
+    *) echo "3 Checkmk_Agent_Files_$site - An unknown error occured"
+  esac
+done
+
+exit 0
+

@@ -143,6 +143,23 @@ The performance value of this check contains the number of active peers.
 A peer is considered active if the latest valid handshake is not older than
 five minutes.
 
+## agentfiles
+
+When monitoring hosts with a Checkmk agent, a Checkmk server connects to the
+agent and receives the raw monitoring data from the agent. Typically, the
+agent output size is in the range of some kilobytes. But there is no upper
+limit. By using malicious or badly designed plugins and local checks, the
+output size can get huge, which slows down the checkmk server and makes it
+consume large amounts of memory. When the hosts memory is exceeded, parts of
+the Checkmk monitoring system can crash and need to be restarted. There is no
+way of restricting the maximum allowed size of the agent output.
+
+This local check should be installed on any Checkmk server with at least one
+running site. It monitors the size of each cached Checkmk agent output file.
+There is one check item for each installed checkmk site. The status is WARN or
+CRIT if at least one cached agent file is larger than the configured thresholds,
+which are 2MB and 16MB (warn/crit).
+
 ## keepalived (local check and notify script)
 
 Checkmk has support for monitoring the states of keepalived VRRP instances.
