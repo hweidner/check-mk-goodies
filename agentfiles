@@ -25,14 +25,14 @@ CRITSIZE=16MB
 cd /opt/omd/sites || exit 0
 
 for site in *; do
-  cd $site/tmp/check_mk/cache || continue
+  cd /opt/omd/sites/$site/tmp/check_mk/cache || continue
   status=0
   critcount=0
   criticals=""
   warncount=0
   warnings=""
 
-  /usr/bin/stat -c "%s %n" * | while read size name; do
+  /usr/bin/find -type f -printf "%s %P\n" | while read size name; do
     if [[ $size -gt $CRIT ]]; then
       critcount=$((critcount + 1))
       criticals="$criticals $name"
