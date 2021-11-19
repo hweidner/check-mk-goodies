@@ -88,11 +88,12 @@ Example output in Checkmk console:
 
 ![mhz example](img/mhz.png "mhz example")
 
-## psi
+## psi (Pressure Stall Informations)
 
-This local check script handles the new pressure stall information (PSI)
-in the Linux kernel >= 4.20. It generated three check items for CPU, memory
-and I/O pressure each. Each item output three performance values about the
+This local check script handles the new
+[pressure stall information (PSI)](https://www.kernel.org/doc/html/latest/accounting/psi.html)
+in the Linux kernel ≥ 4.20. It generates three check items for CPU, memory
+and I/O pressure each. Each item outputs two performance values about the
 average pressure (in percent) in the last 60 and 300 seconds. (The PSI also
 contain a value about the last 10 seconds, but the check omits them, due to the
 default Checkmk check interval of 60s.)
@@ -109,6 +110,11 @@ for details on how pressure stall infomation work.
 As the output of this check is very dynamic, it should not be cached by the
 agent (e.g. put it in the local script directory, not one of it's
 subdirectories.)
+
+The default thresholds for the "some" values are 90%/95% with the 60s interval
+and 80%/90% with the less volatile 300s interval. For the "full" value, the
+60s thresholds are 80%/90%, and 60%/80% with 300s. The thresholds can be
+changed according to your needs at the beginning of the script.
 
 Example output in Checkmk console:
 

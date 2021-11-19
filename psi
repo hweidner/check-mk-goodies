@@ -16,6 +16,11 @@
 use strict;
 use warnings;
 
+# configuration - adjust for your needs
+my ($WARNsome60, $WARNsome300, $WARNfull60, $WARNfull300) = (90, 80, 80, 60);
+my ($CRITsome60, $CRITsome300, $CRITfull60, $CRITfull300) = (95, 90, 90, 80);
+
+# psi check
 for my $f (qw(cpu memory io)) {
   my $vars;
   open(IN, "< /proc/pressure/$f") || next;
@@ -23,9 +28,9 @@ for my $f (qw(cpu memory io)) {
     if(/^(some|full) avg10=(\d+.\d+) avg60=(\d+.\d+) avg300=(\d+.\d+) total=(\d+)$/) {
       my ($scope, $avg10, $avg60, $avg300, $total) = ($1, $2, $3, $4, $5);
       if($scope eq "some") {
-        $vars = "psi_${f}_${scope}_avg60=$avg60;50;75;0;100|psi_${f}_${scope}_avg300=$avg300;50;75;0;100";
+        $vars = "psi_${f}_${scope}_avg60=$avg60;$WARNsome60;$CRITsome60;0;100|psi_${f}_${scope}_avg300=$avg300;$WARNsome300;$CRITsome300;0;100";
       } else {
-        $vars .= "|psi_${f}_${scope}_avg60=$avg60;25;50;0;100|psi_${f}_${scope}_avg300=$avg300;25;50;0;100";
+        $vars .= "|psi_${f}_${scope}_avg60=$avg60;$WARNfull60;$CRITfull60;0;100|psi_${f}_${scope}_avg300=$avg300;$WARNfull300;$CRITfull300;0;100";
       }
     }
   }
