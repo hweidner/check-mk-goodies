@@ -138,12 +138,13 @@ Note that Checkmk comes with agent plugins for APT (Debian/Ubuntu) and Zypper
 subdirectory of the Checkmk agent. That's why the local check here does not
 consider Debian/Ubuntu or SUSE systems.
 
-# reboot
+## reboot
 
 This script checks if a reboot is pending after package installations or updates.
-Only the Red Hat family and Debian/Ubuntu and derivates are supported. Under
-Red Hat, the check evaluates the oupput of the `needs-restarting -r` command.
-On Debian family systems, the files `/run/reboot-required` and
+Only the Red Hat family and Debian/Ubuntu and derivates are supported.
+
+Under Red Hat, the check evaluates the output of the `needs-restarting -r`
+command. On Debian-like systems, the files `/run/reboot-required` and
 `/run/reboot-required.pkgs` are evaluated, according to [section 9.12 of the
 Debian Policy Manual](https://www.debian.org/doc/debian-policy/ch-opersys.html#signaling-that-a-reboot-is-required).
 
