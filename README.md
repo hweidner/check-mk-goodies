@@ -1,20 +1,22 @@
 # Checkmk goodies
 
-Some useful Linux checks for the [Checkmk](https://checkmk.com)
+Some useful Linux checks and integrations for the [Checkmk](https://checkmk.com)
 monitoring system.
 
-Currently, all the checks are
+Most of the scripts are
 [Checkmk local checks](https://checkmk.com/cms_localchecks.html).
 They are used together with the Checkmk Linux agent.
 
 **Some of these scripts do not work with Checkmk 2.0.0 and 2.0.0p1, due to
 a bug in the "local" check plugin.**
 Use Checkmk version 2.0.0p2 or newer, and ensure to install the latest Linux
-agent on all monitored systems, or use Checkmk 1.6 or older.
+agent on all monitored systems. You can also run the local check scripts
+using Checkmk 1.6 or older, but compatibility to Checkmk less than 2.0
+will be dropped in the near future. The autobp script requires Checkmk 2.1.
 
 ## Installation
 
-To use these scripts, you need to install the
+To use the Local Check scripts, you need to install the
 [Linux Agent for Checkmk](https://checkmk.com/cms_agent_linux.html).
 
 Put the scripts under the "local" directory of the Linux agent, which is
@@ -22,6 +24,13 @@ Put the scripts under the "local" directory of the Linux agent, which is
 installing the agent from the EPEL repositories, the directory is
 ``/usr/share/check-mk-agent/local``.) The scripts must be executable by the
 Checkmk agent (e.g. ``chmod 755 <Checkname>``).
+
+## autopb (automatic piggyback host creation)
+
+The ``autopb`` script is not a local check, but a cron job which runs under
+the Checkmk site user. It automatically creates missing host objecs in Checkmk
+when piggyback data ia available. See the [autopb](autopb/) directory for more
+information.
 
 ## osinfo
 

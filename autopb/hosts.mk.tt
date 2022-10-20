@@ -1,0 +1,25 @@
+# Created by autopb.pl
+
+all_hosts += [ [% FOREACH host IN pbhosts %]'[% host %]', [% END %] ]
+
+host_tags.update({
+[% FOREACH host IN pbhosts -%]
+    '[% host %]': {'address_family': 'no-ip', 'agent': 'no-agent', 'criticality': 'prod', 'networking': 'lan',
+                   'piggyback': 'piggyback', 'site': '[% site %]', 'snmp_ds': 'no-snmp'},
+[% END -%]
+})
+
+host_labels.update({
+[% FOREACH host IN pbhosts -%]
+    '[% host %]': {'autopb': 'true'},
+[% END -%]
+})
+
+# Host attributes (needed for WATO)
+host_attributes.update({
+[% FOREACH host IN pbhosts -%]
+  '[% host %]': {'meta_data': {'created_at': 0.0, 'created_by': 'omdadmin', 'updated_at': 0.0}},
+[% END -%]
+})
+
+folder_attributes.update({})

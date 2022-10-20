@@ -1,0 +1,97 @@
+#!/usr/bin/perl
+
+# (c) Harald Weidner, 2022-10-18
+# License: MIT
+#
+# autopb.pl - auto-create hosts from available piggyback data
+#
+
+use strict;
+use warnings;
+
+#use Data::Dumper;
+use Template;
+
+# configuration
+my $MAXAGE = 240;  # maximum age of piggyback data in minutes
+
+# global variables
+my $HOME = $ENV{"HOME"};
+my $SITE = $ENV{"OMD_SITE"};
+
+my %CMKHOSTS = ();
+my @PBHOSTS  = ();
+
+# initialize template toolkit
+my $tt = Template->new({INCLUDE_PATH => "$HOME/local/lib/autopb", INTERPOLATE  => 1})
+    || die "CRIT: $Template::ERROR\n";
+
+# get list of regular hosts in Checkmk
+getallhosts();
+
+# get list of hosts with piggyback data
+getpbhosts();
+
+# process hosts.mk template
+my %vars = (pbhosts => \@PBHOSTS, site => $SITE);
+$tt->process("hosts.mk.tt", \%vars, "$HOME/tmp/autopb.hosts.mk ")
+    || die "CRIT: Template hosts.mk.tt could not be processed to tmp/autopb.hosts.mk.\n";
+
+# transfer hosts.mk into WATO folder autopb and restart CMK if changed
+if(`rsync -ci $HOME/tmp/autopb.hosts.mk $HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk` ne "") {
+    `cmk -R`;
+}
+
+unlink("$HOME/tmp/autopb.hosts.mk");
+exit 0;
+
+
+#
+#
+#
+
+# Function getallhosts creates a list of hosts that are configured in a checkmk site.
+# This is done by parsing the hosts.mk files from the WATO hosts configuation.
+# The list does NOT include the already created auto-piggyback hosts from the autopb folder.
+
+sub getallhosts {
+    open(HOSTS, "find $HOME/etc/check_mk/conf.d/wato/ -type f -name hosts.mk |") || die;
+    while(my $host = <HOSTS>) {
+        next if($host =~ m#etc/check_mk/conf.d/wato/autopb/hosts.mk$#);
+
+        my $allhosts = "";
+        open(HOSTSMK, "< $host") || next;
+        while(<HOSTSMK>) {
+            chomp;
+            next if($allhosts eq "" && $_ !~ /^all_hosts \+=/);
+            last if($_ eq "");
+            $allhosts .= $_;
+        }
+        close(HOSTSMK);
+
+        next unless($allhosts =~ m/\[(.*)\]/);
+        $allhosts = $1;
+        my @hosts = split(/,/, $allhosts);
+        for $_ (@hosts) {
+            s/^\s*\'//;
+            s/\'\s*$//;
+            $CMKHOSTS{$_} = 1;
+        }
+    }
+    close(HOSTS);
+}
+
+# Function getpbhosts creates a list of all hosts for which piggyback data is available,
+# not older than MAXAGE, and the hosts are not regular CMK hosts objects
+sub getpbhosts {
+    my $pbdir = "$HOME/tmp/check_mk/piggyback";
+    opendir(HOSTS, "$pbdir/") || return;
+    while(readdir(HOSTS)) {
+        chomp;
+        next if(/^\./);                              # omit dot files, especially . and ..
+        next if(defined $CMKHOSTS{$_});              # omit regular CMK hosts
+        next if((-M "$pbdir/$_") * 24 * 60 > $MAXAGE); # omit outdated piggyback data
+        push @PBHOSTS, $_;
+    }
+    closedir(HOSTS);
+}
