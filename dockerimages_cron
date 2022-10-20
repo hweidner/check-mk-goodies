@@ -32,10 +32,10 @@ if [[ ! -x /usr/bin/jq ]]; then
   exit 1
 fi
 
+[[ -d $CACHEDIR ]] || mkdir -p $CACHEDIR
+
 test -f $NEW && exit 0   # another instance is running
 touch $NEW
-
-[[ -d $CACHEDIR ]] || mkdir -p $CACHEDIR
  
 for container in $(docker ps -a --format '{{.Names}}'); do
   read image_name image_id < <(docker inspect --format '{{.Config.Image}} {{.Image}}' $container)
