@@ -252,14 +252,14 @@ this, pull the new image, stop and destroy the container, and start it again:
 	# docker pull foo_image
 	# docker stop foo_container
 	# docker rm foo_container
-	# docker run --name foo container ... foo_image
+	# docker run --name foo_container ... foo_image
 
 Note that the check skips containers which do not yet have an entry in the
 cache file, or where the container name is reused using an other image than
 the cached one. The container will start to be checked after the next run
 of the cron job.
 
-Caveats:
+### Caveats:
 
 From time to time, it happens that an image gets a new repository digest
 although its content did not change. In this case, the `docker pull`
