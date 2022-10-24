@@ -9,7 +9,6 @@
 use strict;
 use warnings;
 
-#use Data::Dumper;
 use Template;
 
 # configuration
@@ -19,8 +18,9 @@ my $MAXAGE = 240;  # maximum age of piggyback data in minutes
 my $HOME = $ENV{"HOME"};
 my $SITE = $ENV{"OMD_SITE"};
 
-my %CMKHOSTS = ();
-my @PBHOSTS  = ();
+my %CMKHOSTS = ();    # hosts regularly configured in Checkmk
+my %OLDPBHOSTS = ();  # hosts already present in the autopb folder
+my @PBHOSTS  = ();    # hosts with piggyback data
 
 # initialize template toolkit
 my $tt = Template->new({INCLUDE_PATH => "$HOME/local/lib/autopb", INTERPOLATE  => 1})
@@ -28,6 +28,9 @@ my $tt = Template->new({INCLUDE_PATH => "$HOME/local/lib/autopb", INTERPOLATE  =
 
 # get list of regular hosts in Checkmk
 getallhosts();
+
+# get list of hosts in the autopb folder
+getoldpbhosts();
 
 # get list of hosts with piggyback data
 getpbhosts();
@@ -37,8 +40,14 @@ my %vars = (pbhosts => \@PBHOSTS, site => $SITE);
 $tt->process("hosts.mk.tt", \%vars, "$HOME/tmp/autopb.hosts.mk ")
     || die "CRIT: Template hosts.mk.tt could not be processed to tmp/autopb.hosts.mk.\n";
 
-# transfer hosts.mk into WATO folder autopb and restart CMK if changed
+# transfer hosts.mk into WATO folder autopb
+# rediscover new autopb hosts and restart CMK if needed
 if(`rsync -ci $HOME/tmp/autopb.hosts.mk $HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk` ne "") {
+    my $newpbhosts = "";
+    for my $h (@PBHOSTS) {
+        $newpbhosts .= " $h" unless(defined $OLDPBHOSTS{$h});
+    }
+    `cmk -I $newpbhosts` if($newpbhosts ne "");
     `cmk -R`;
 }
 
@@ -46,14 +55,9 @@ unlink("$HOME/tmp/autopb.hosts.mk");
 exit 0;
 
 
-#
-#
-#
-
 # Function getallhosts creates a list of hosts that are configured in a checkmk site.
 # This is done by parsing the hosts.mk files from the WATO hosts configuation.
 # The list does NOT include the already created auto-piggyback hosts from the autopb folder.
-
 sub getallhosts {
     open(HOSTS, "find $HOME/etc/check_mk/conf.d/wato/ -type f -name hosts.mk |") || die;
     while(my $host = <HOSTS>) {
@@ -71,12 +75,36 @@ sub getallhosts {
 
         next unless($allhosts =~ m/\[(.*)\]/);
         $allhosts = $1;
+        $allhosts =~ s/,\s*$//;
         my @hosts = split(/,/, $allhosts);
         for $_ (@hosts) {
             s/^\s*\'//;
             s/\'\s*$//;
             $CMKHOSTS{$_} = 1;
         }
+    }
+    close(HOSTS);
+}
+
+# Function getoldpbhosts gets a list of host which are already present in the autopb folder
+sub getoldpbhosts {
+    my $allhosts = "";
+    open(HOSTSMK, "< $HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk") || return;
+    while(<HOSTSMK>) {
+        chomp;
+        next if($allhosts eq "" && $_ !~ /^all_hosts \+=/);
+        last if($_ eq "");
+        $allhosts .= $_;
+    }
+    close(HOSTSMK);
+    next unless($allhosts =~ m/\[(.*)\]/);
+    $allhosts = $1;
+    $allhosts =~ s/,\s*$//;
+    my @hosts = split(/,/, $allhosts);
+    for $_ (@hosts) {
+        s/^\s*\'//;
+        s/\'\s*$//;
+        $OLDPBHOSTS{$_} = 1;
     }
     close(HOSTS);
 }

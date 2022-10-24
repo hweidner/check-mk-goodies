@@ -9,8 +9,8 @@ This is very basically what the
 [Checkmk Dynamic Configuration Daemon (DCD)](https://docs.checkmk.com/latest/en/dcd.html)
 and its piggyback connector does, which is only available in the Enterprise edition.
 
-Many buildin checks create piggyback data. Examples are the the special agents
-for VMware, Proxmox VE or Kubernetes, or the agent plugin for Docker.
+In Checkmk, many buildin checks create piggyback data. Examples are the the
+special agents for VMware, Proxmox VE or Kubernetes, or the agent plugin for Docker.
 Piggyback data is data coming from one host (e.g. a Docker host or a Proxmox VE
 host), but referring to another "host" object (the container or VM). Checkmk will
 display these informations only if the there is a host object configured with
@@ -18,15 +18,19 @@ that name.
 
 The `autopb` script scans the site's configuration for hosts that are not yet
 created as host objects in WATO, but piggyback data is available for them. This
-is done by parsing the hosts.mk files below etc/check_mk/conf.d/wato, and the
-piggyback directories under tmp/check_mk/piggyback. It then creates a `hosts.mk`
+is done by parsing the `hosts.mk` files below `etc/check_mk/conf.d/wato`, and the
+piggyback directories under `tmp/check_mk/piggyback`. It then creates a `hosts.mk`
 file for a special WATO folder named `autopb`, which must be created first. The
 script also removes those hosts if no more piggyback data is available or if
-it is older than four hours (configurable in the beginning of the script).
+they are older than four hours (configurable in the beginning of the script).
+
+If new hosts were added, a service discovery `cmk -I` is issued on them.
+Whenever the hosts.mk file changes, the configuration changes are activated
+with `cmk -R`, which is the recommended way on the Checkmk Raw Edition.
 
 The automatically created host objects are rather dumb. They do not have an
 IP address nor get their UP/DOWN state checked in any way. There are solely
-there to show up the collected piggyback data.
+there to display the collected piggyback data.
 
 While having some shortcomings (see below), this solution makes it more
 comfortable to use checks with piggyback data. It is especially helpful when
@@ -43,7 +47,8 @@ To install the script, follow the steps:
    it executable.
 2. Create a directory `local/lib/autopb` and place the file `hosts.mk.tt` there.
    (This is a template of a `host.mk` file for the Perl Template Toolkit.)
-3. Install the Perl Template Toolkit and the rsync package. E.g. on Debian, do
+3. Install the Perl Template Toolkit and the rsync package. E.g. on Debian or
+   Ubuntu, do
    ```
    # apt install libtemplate-perl rsync
    ```
@@ -54,7 +59,9 @@ To install the script, follow the steps:
    every 15 minutes, and that the service configuration should be automatically
    updated in the mode _Refresh all services and host labels (Tabula rasa)_.
    Changes should be grouped for e.g. 5 minutes, and activated automatically.
-6. In `etc/cron.d/autopb`, create a cron job that runs the script e.g. every 15
+6. Run the `local/bin/autopb` script manually once. If there is piggyback
+   data available, this might take a while, as every new host is discovered.
+7. In `etc/cron.d/autopb`, create a cron job that runs the script e.g. every 15
    minutes:
    ```
    */15 * * * *  $HOME/local/bin/autopb
@@ -65,12 +72,12 @@ To install the script, follow the steps:
 
 This solution has some shortcomings. Compared to the DCD, it takes much longer
 for piggybacked hosts and their monitoring data to show up in Checkmk. It can
-take up to 15 minutes for a host to show up, and another 20 minutes until all
-checks are visible.
+take up to 15 minutes for a host to show up, and some more time until all checks
+are visible.
 
-When a new host object comes up, the _Check_MK_ check is in CRIT state for some
-minutes because it has no data. If you use notifications, make sure that those
-Checks do not create an alarm.
+When a new host object comes up, the _Check_MK_ check might be in CRIT state for
+the first minutes because it has no data. If you use notifications, make sure that
+those Checks do not create an alarm.
 
 Every automatically created host object belongs to the `autopb` WATO folder.
 This is different from the DCD, where every dynamically created host belongs
