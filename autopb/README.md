@@ -45,23 +45,21 @@ To install the script, follow the steps:
 
 1. Install the `autopb` script under `local/bin` of your Checkmk site and make
    it executable.
-2. Create a directory `local/lib/autopb` and place the file `hosts.mk.tt` there.
-   (This is a template of a `host.mk` file for the Perl Template Toolkit.)
-3. Install the Perl Template Toolkit and the rsync package. E.g. on Debian or
+2. Install the Perl Template Toolkit and the rsync package. E.g. on Debian or
    Ubuntu, do
    ```
    # apt install libtemplate-perl rsync
    ```
-4. In Checkmk, create a WATO folder (Setup -> Hosts -> Create Folder) named
+3. In Checkmk, create a WATO folder (Setup -> Hosts -> Create Folder) named
    `autopb`. Do not manually create any hosts in that folder.
-5. In Checkmk, create a rule of type _Periodic Service Discovery_ in the
+4. In Checkmk, create a rule of type _Periodic Service Discovery_ in the
    `autopb` folder. Specify that a service discovery should be performed
    every 15 minutes, and that the service configuration should be automatically
    updated in the mode _Refresh all services and host labels (Tabula rasa)_.
    Changes should be grouped for e.g. 5 minutes, and activated automatically.
-6. Run the `local/bin/autopb` script manually once. If there is piggyback
+5. Run the `local/bin/autopb` script manually once. If there is piggyback
    data available, this might take a while, as every new host is discovered.
-7. In `etc/cron.d/autopb`, create a cron job that runs the script e.g. every 15
+6. In `etc/cron.d/autopb`, create a cron job that runs the script e.g. every 15
    minutes:
    ```
    */15 * * * *  $HOME/local/bin/autopb
