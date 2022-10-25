@@ -20,14 +20,14 @@ To use the Local Check scripts, you need to install the
 [Linux Agent for Checkmk](https://checkmk.com/cms_agent_linux.html).
 
 Put the scripts under the "local" directory of the Linux agent, which is
-``/usr/lib/check_mk_agent/local`` on most systems. (When using CentOS/Red Hat and
+`/usr/lib/check_mk_agent/local` on most systems. (When using CentOS/Red Hat and
 installing the agent from the EPEL repositories, the directory is
-``/usr/share/check-mk-agent/local``.) The scripts must be executable by the
-Checkmk agent (e.g. ``chmod 755 <Checkname>``).
+`/usr/share/check-mk-agent/local`.) The scripts must be executable by the
+Checkmk agent (e.g. `chmod 755 <Checkname>`).
 
 ## autopb (automatic piggyback host creation)
 
-The ``autopb`` script is not a local check, but a cron job which runs under
+The `autopb` script is not a local check, but a cron job which runs under
 the Checkmk site user. It automatically creates missing host objecs in Checkmk
 when piggyback data ia available. See the [autopb](autopb/) directory for more
 information.
@@ -236,7 +236,7 @@ The check consists of two scripts that must be used together:
 The script job `dockerimages_cron` needs to be run by cron, e.g. every couple
 of hours. You can put it into the `/etc/cron.hourly` directory, or create a
 separate cron job for it. The latter has the advantage that the job itselves
-can be monitored with the ``mk-job`` utility:
+can be monitored with the `mk-job` utility:
 
 	# file /etc/cron.d/dockerimages
 	#
@@ -244,8 +244,9 @@ can be monitored with the ``mk-job`` utility:
 	15 */2 * * *  root  /usr/bin/mk-job dockerimages /root/bin/dockerimages_cron
 
 The script requires the tools `skopeo` and `jq` to be installed under `/usr/bin`.
-Install them with the tools of your Linux distribution. For Debian Linux, you
-might need to add the package sources of the upcomig `bullseye` release.
+Install them with the tools of your Linux distribution. For Debian Linux 10
+(buster), you might need to add the package sources of the Debian 11 (bullseye)
+release.
 
 This script `dockerimages` should be put in a subdirectory of the Local Check
 directory, e.g. `300/dockerimages` to run it every five minutes. It reads the
@@ -268,6 +269,12 @@ cache file, or where the container name is reused using an other image than
 the cached one. The container will start to be checked after the next run
 of the cron job.
 
+If you run Docker, consider also to install the [official Checkmk agent plugin
+for Docker](https://docs.checkmk.com/latest/en/monitoring_docker.html)
+and use the [DCD piggyback connector](https://docs.checkmk.com/latest/en/dcd.html),
+or the [autopb](autopb/) skript on the Checkmk Raw edition, to make monitoring
+information for the containers available.
+
 ### Caveats:
 
 From time to time, it happens that an image gets a new repository digest
@@ -278,7 +285,7 @@ disappear after the next check.
 
 You can view such images with the docker command:
 
-	# root@jadis:/var/local/cache# docker images --digests
+	# docker images --digests
 	REPOSITORY  TAG       DIGEST                                                                    IMAGE ID       CREATED        SIZE
 	[...]
 	nextcloud   latest    sha256:6a80db1ed397cccae7f121a0c4aa8b65ec90c0ccc244f49861e7feacf42c2491   226698e20b65   5 days ago     868MB
@@ -293,7 +300,7 @@ that has not actually changed gets uploaded again.
 
 This scripts should not be used on hosts that are part of a Kubernetes cluster.
 On such hosts, the docker containers are managed and kept up-to-date by Kubernetes.
-You might consider using the ``k8s`` local check explained below.
+You might consider using the `k8s` local check explained below.
 
 ## k8s (Kubernetes)
 
@@ -311,10 +318,10 @@ mechanism. This has several implications:
     It is much work to create them manually and keep them up-to-date. One might
     want to enable the dynamic configuration daemon (DCD), but it is only present
     in the Checkmk enterprise edition. With the Checkmk raw (open source) edition,
-    you need to create the hosts manually, or need 3rd party scripts to automate
-    that.
+    you need to create the hosts manually, or need 3rd party scripts like
+    [autopb](autopb) to automate that.
   * Even in a small Kubernetes cluster, the number of piggyback hosts quickly
-    exceeds 10, which is the host limit for the Checkmk demo edition.
+    exceeds 25, which is the host limit for the Checkmk Free Edition.
   * In a Kubernetes cluster, some entities come and go. This is always true for
     pods, as replaced pods have an other, randomly generated name. In an agile
     or development environment, this can be also true for deployments, services,
@@ -326,11 +333,11 @@ mechanism. This has several implications:
     Kubernetes system services from different clusters will appear under the
     same host name. You need complex translation rules to separate them.
 
-In contrast to the buildin Kubernetes monitoring, the ``k8s`` local check offers
+In contrast to the buildin Kubernetes monitoring, the `k8s` local check offers
 a rather conservative approach to Kubernetes monitoring.
 
 The script is installed on one (or more) hosts of the Kubernetes cluster, or on
-a separate control node which has access to the cluster. It requires the ``kubectl``
+a separate control node which has access to the cluster. It requires the `kubectl`
 binary and a KUBECONFIG file with the credentials to access the cluster and read
 the informations on all nodes, namespaces, pods, services, deployments, ingresses,
 statefulsets, daemonsets, and replicasets. The output consists of a quite constant
@@ -353,9 +360,9 @@ set of check items:
 
 The number and names of the check items are constant, unless you add or remove
 cluster nodes, or create/delete namespaces. This does happen rather seldom.
-In this cases, the host(s) running the local check have to be reinventorized,
-potentially by an automated intentory check. As long as nodes and namespaces
-are unchanged, no inventorization is needed.
+In this cases, the host(s) running the local check have to be rediscovered,
+potentially by an automated discovery check. As long as nodes and namespaces
+are unchanged, no rediscovery is needed.
 
 Most of the check items are always in the state OK. An exception are the check
 items for each namespace and deployment, statefulset, daemonset, and replicaset.
@@ -374,9 +381,9 @@ values.
 
 ![k8s multiline example](img/k8s_multiline.png "k8s multiline example")
 
-The check is installed by copying the ``k8s`` script to the local checks
-directory, which is usually ``/usr/lib/check_mk_agent/local``, and made
-executable (``chmod 755 k8s``). The configuration values KUBECTL und KUBECONFIG
+The check is installed by copying the `k8s` script to the local checks
+directory, which is usually `/usr/lib/check_mk_agent/local`, and made
+executable (`chmod 755 k8s`). The configuration values KUBECTL und KUBECONFIG
 might have to be adapted to the own installation; in the current version, they
 refer to a MicroK8s installation from the snap repository of an Ubuntu system.
 
