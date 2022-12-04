@@ -69,21 +69,18 @@ To install the script, follow the steps:
 ## Caveats
 
 This solution has some shortcomings. Compared to the DCD, it takes much longer
-for piggybacked hosts and their monitoring data to show up in Checkmk. It can
-take up to 15 minutes for a host to show up, and some more time until all checks
-are visible.
-
-When a new host object comes up, the _Check_MK_ check might be in CRIT state for
-the first minutes because it has no data. If you use notifications, make sure that
-those Checks do not create an alarm.
+for piggybacked hosts and their monitoring data to show up in Checkmk. With the
+configuration shown above, it can take up to 15 minutes for a host to show up,
+and some more time until all checks are visible.
 
 Every automatically created host object belongs to the `autopb` WATO folder.
-This is different from the DCD, where every dynamically created host belongs
-to the same folder where the piggyback data creating host is located in. The
-Checkmk Enterprise edition and the DCD approach gives you more power to avoid
+This is different from the DCD, where it is possible to attach the dynamically
+created hosts to different folders, depending on the host where the piggyback
+data originated.
+The Checkmk Enterprise edition and the DCD approach gives you more power to avoid
 naming conflicts, e.g. by translating hostnames according to the folder. With
-the autobp solution, it can be difficult to monitor several Kubernetes clusters
-on the same Checkmk site.
+the autobp solution, it can be difficult to monitor several Docker hosts or
+hypervisors when the names of containers or VMs do overlap.
 
 If you get a host object automatically created by this mechanism, you might
 later want to create it as a "regular" host. For example, if you run a
@@ -100,13 +97,13 @@ again.
 
 When you run Checkmk from the official Docker image, there is neither the
 Perl Template Toolkit nor the rsync package installed. You can install them
-manually (the image is based on Debian 10), but this needs to be done on
+manually (the image is based on Debian 10), but this needs to be repeated on
 every new release.
 
 To automate this, write a script that starts the container and immediately
 installs the needed packages, like this:
 ```
-docker run -d --name=checkmk ... checkmk/check-mk-raw:2.1.0-latest
+docker run -d --name checkmk ... checkmk/check-mk-raw:2.1.0-latest
 docker exec checkmk -c 'apt update && apt -y install libtemplate-perl rsync'
 ```
 

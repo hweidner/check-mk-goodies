@@ -126,7 +126,7 @@ sub getpbhosts {
 
 # host.mk Template for autopb folder
 __DATA__
-# Created by autopb.pl
+# Created by autopb
 
 all_hosts += [ [% FOREACH host IN pbhosts %]'[% host %]', [% END %] ]
 
