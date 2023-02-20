@@ -28,7 +28,9 @@ If new hosts were added, a service discovery `cmk -I` is issued on them.
 Whenever the hosts.mk file changes, the configuration changes are activated
 with `cmk -R`, which is the recommended way on the Checkmk Raw Edition.
 
-The automatically created host objects are rather dumb. They do not have an
+The automatically created host objects have their piggyback sources configured
+as parents, so that the parent-child relationship is used in notifications and
+in the topology graph. Besides that, they are rather dumb. They do not have an
 IP address nor get their UP/DOWN state checked in any way. There are solely
 there to display the collected piggyback data.
 

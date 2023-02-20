@@ -12,15 +12,15 @@ use warnings;
 use Template;
 
 # configuration
-my $MAXAGE = 240;  # maximum age of piggyback data in minutes
+my $MAXAGE = 240;    # maximum age of piggyback data in minutes
 
 # global variables
 my $HOME = $ENV{"HOME"};
 my $SITE = $ENV{"OMD_SITE"};
 
-my %CMKHOSTS = ();    # hosts regularly configured in Checkmk
-my %OLDPBHOSTS = ();  # hosts already present in the autopb folder
-my @PBHOSTS  = ();    # hosts with piggyback data
+my %CMKHOSTS   = ();    # hosts regularly configured in Checkmk
+my %OLDPBHOSTS = ();    # hosts already present in the autopb folder
+my %PBHOSTS    = ();    # hosts with piggiback data, and their sources
 
 # initialize template toolkit
 my $tt = Template->new() || die "CRIT: $Template::ERROR\n";
@@ -35,47 +35,52 @@ getoldpbhosts();
 getpbhosts();
 
 # process hosts.mk template
-my %vars = (pbhosts => \@PBHOSTS, site => $SITE);
-$tt->process(\*DATA, \%vars, "$HOME/tmp/autopb.hosts.mk ")
-    || die "CRIT: Template hosts.mk.tt could not be processed to tmp/autopb.hosts.mk.\n";
+my %vars = ( pbhosts => \%PBHOSTS, site => $SITE );
+$tt->process( \*DATA, \%vars, "$HOME/tmp/autopb.hosts.mk " )
+  || die
+  "CRIT: Template hosts.mk.tt could not be processed to tmp/autopb.hosts.mk.\n";
 
 # transfer hosts.mk into WATO folder autopb
 # rediscover new autopb hosts and restart CMK if needed
-if(`rsync -ci $HOME/tmp/autopb.hosts.mk $HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk` ne "") {
+if (
+`rsync -ci $HOME/tmp/autopb.hosts.mk $HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk`
+    ne "" )
+{
     my $newpbhosts = "";
-    for my $h (@PBHOSTS) {
-        $newpbhosts .= " $h" unless(defined $OLDPBHOSTS{$h});
+    for my $h ( keys %PBHOSTS ) {
+        $newpbhosts .= " $h" unless ( defined $OLDPBHOSTS{$h} );
     }
-    `cmk -I $newpbhosts` if($newpbhosts ne "");
+    `cmk -I $newpbhosts` if ( $newpbhosts ne "" );
     `cmk -R`;
 }
 
 unlink("$HOME/tmp/autopb.hosts.mk");
 exit 0;
 
-
 # Function getallhosts creates a list of hosts that are configured in a checkmk site.
 # This is done by parsing the hosts.mk files from the WATO hosts configuation.
 # The list does NOT include the already created auto-piggyback hosts from the autopb folder.
 sub getallhosts {
-    open(HOSTS, "find $HOME/etc/check_mk/conf.d/wato/ -type f -name hosts.mk |") || die;
-    while(my $host = <HOSTS>) {
-        next if($host =~ m#etc/check_mk/conf.d/wato/autopb/hosts.mk$#);
+    open( HOSTS,
+        "find $HOME/etc/check_mk/conf.d/wato/ -type f -name hosts.mk |" )
+      || die;
+    while ( my $host = <HOSTS> ) {
+        next if ( $host =~ m#etc/check_mk/conf.d/wato/autopb/hosts.mk$# );
 
         my $allhosts = "";
-        open(HOSTSMK, "< $host") || next;
-        while(<HOSTSMK>) {
+        open( HOSTSMK, "< $host" ) || next;
+        while (<HOSTSMK>) {
             chomp;
-            next if($allhosts eq "" && $_ !~ /^all_hosts \+=/);
-            last if($_ eq "");
+            next if ( $allhosts eq "" && $_ !~ /^all_hosts \+=/ );
+            last if ( $_ eq "" );
             $allhosts .= $_;
         }
         close(HOSTSMK);
 
-        next unless($allhosts =~ m/\[(.*)\]/);
+        next unless ( $allhosts =~ m/\[(.*)\]/ );
         $allhosts = $1;
         $allhosts =~ s/,\s*$//;
-        my @hosts = split(/,/, $allhosts);
+        my @hosts = split( /,/, $allhosts );
         for $_ (@hosts) {
             s/^\s*\'//;
             s/\'\s*$//;
@@ -88,18 +93,19 @@ sub getallhosts {
 # Function getoldpbhosts gets a list of host which are already present in the autopb folder
 sub getoldpbhosts {
     my $allhosts = "";
-    open(HOSTSMK, "< $HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk") || return;
-    while(<HOSTSMK>) {
+    open( HOSTSMK, "< $HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk" )
+      || return;
+    while (<HOSTSMK>) {
         chomp;
-        next if($allhosts eq "" && $_ !~ /^all_hosts \+=/);
-        last if($_ eq "");
+        next if ( $allhosts eq "" && $_ !~ /^all_hosts \+=/ );
+        last if ( $_ eq "" );
         $allhosts .= $_;
     }
     close(HOSTSMK);
-    next unless($allhosts =~ m/\[(.*)\]/);
+    next unless ( $allhosts =~ m/\[(.*)\]/ );
     $allhosts = $1;
     $allhosts =~ s/,\s*$//;
-    my @hosts = split(/,/, $allhosts);
+    my @hosts = split( /,/, $allhosts );
     for $_ (@hosts) {
         s/^\s*\'//;
         s/\'\s*$//;
@@ -108,45 +114,68 @@ sub getoldpbhosts {
     close(HOSTS);
 }
 
-# Function getpbhosts creates a list of all hosts for which piggyback data is available,
-# not older than MAXAGE, and the hosts are not regular CMK hosts objects
+# Function getpbhosts creates a has of all hosts for which piggyback data is available,
+# not older than MAXAGE, and the hosts are not regular CMK hosts objects; together with
+# a list of the piggyback sources.
 sub getpbhosts {
+
+    # search for piggyback hosts
     my $pbdir = "$HOME/tmp/check_mk/piggyback";
-    opendir(HOSTS, "$pbdir/") || return;
-    while(readdir(HOSTS)) {
-        chomp;
-        next if(/^\./);                              # omit dot files, especially . and ..
-        next if(defined $CMKHOSTS{$_});              # omit regular CMK hosts
-        next if((-M "$pbdir/$_") * 24 * 60 > $MAXAGE); # omit outdated piggyback data
-        push @PBHOSTS, $_;
+    opendir( HOSTS, "$pbdir/" ) || return;
+    while ( my $h = readdir(HOSTS) ) {
+        chomp $h;
+        next if ( $h =~ /^\./ );           # omit dot files, especially . and ..
+        next if ( defined $CMKHOSTS{$h} ); # omit regular CMK hosts
+        next
+          if ( ( -M "$pbdir/$h" ) * 24 * 60 > $MAXAGE )
+          ;    # omit outdated piggyback data directories
+
+        # create list of piggyback sources
+        opendir( SRC, "$pbdir/$h" ) || next;
+        while ( readdir(SRC) ) {
+            next if (/^\./);    # omit dot files
+            next
+              if ( ( -M "$pbdir/$h/$_" ) * 24 * 60 > $MAXAGE )
+              ;                 # omit outdated piggyback data files
+            push @{ $PBHOSTS{$h} }, $_;
+        }
+        closedir(SRC);
     }
     closedir(HOSTS);
 }
-
 
 # host.mk Template for autopb folder
 __DATA__
 # Created by autopb
 
-all_hosts += [ [% FOREACH host IN pbhosts %]'[% host %]', [% END %] ]
+all_hosts += [ [% FOREACH host IN pbhosts %]'[% host.key %]', [% END %] ]
 
 host_tags.update({
 [% FOREACH host IN pbhosts -%]
-    '[% host %]': {'address_family': 'no-ip', 'agent': 'no-agent', 'criticality': 'prod', 'networking': 'lan',
+    '[% host.key %]': {'address_family': 'no-ip', 'agent': 'no-agent', 'criticality': 'prod', 'networking': 'lan',
                    'piggyback': 'piggyback', 'site': '[% site %]', 'snmp_ds': 'no-snmp'},
 [% END -%]
 })
 
 host_labels.update({
 [% FOREACH host IN pbhosts -%]
-    '[% host %]': {'autopb': 'true'},
+    '[% host.key %]': {'autopb': 'true'},
+[% END -%]
+})
+
+# Explicit settings for parents
+explicit_host_conf.setdefault('parents', {})
+explicit_host_conf['parents'].update({
+[% FOREACH host IN pbhosts -%]
+    '[% host.key %]': '[% host.value.join(",") %]',
 [% END -%]
 })
 
 # Host attributes (needed for WATO)
 host_attributes.update({
 [% FOREACH host IN pbhosts -%]
-  '[% host %]': {'meta_data': {'created_at': 0.0, 'created_by': 'omdadmin', 'updated_at': 0.0}},
+  '[% host.key %]': {'meta_data': {'created_at': 0.0, 'created_by': 'omdadmin', 'updated_at': 0.0},
+                     'parents': [ '[% host.value.join("', '") %]' ]},
 [% END -%]
 })
 
