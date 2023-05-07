@@ -47,10 +47,9 @@ To install the script, follow the steps:
 
 1. Install the `autopb` script under `local/bin` of your Checkmk site and make
    it executable.
-2. Install the Perl Template Toolkit and the rsync package. E.g. on Debian or
-   Ubuntu, do
-   ```
-   # apt install libtemplate-perl rsync
+2. Install the Perl Template Toolkit. E.g. on Debian or Ubuntu, do
+   ```bash
+   # apt install libtemplate-perl
    ```
 3. In Checkmk, create a WATO folder (Setup -> Hosts -> Create Folder) named
    `autopb`. Do not manually create any hosts in that folder.
@@ -97,15 +96,14 @@ again.
 
 ## Notes for Checkmk Docker image
 
-When you run Checkmk from the official Docker image, there is neither the
-Perl Template Toolkit nor the rsync package installed. You can install them
-manually (the image is based on Debian 10), but this needs to be repeated on
-every new release.
+When you run Checkmk from the official Docker image, the Perl Template Toolkit
+is not installed. You can install it manually (the image is based on Debian 10),
+but this needs to be repeated on every new release.
 
 To automate this, write a script that starts the container and immediately
 installs the needed packages, like this:
-```
-docker run -d --name checkmk ... checkmk/check-mk-raw:2.1.0-latest
-docker exec checkmk -c 'apt update && apt -y install libtemplate-perl rsync'
-```
 
+```bash
+docker run -d --name checkmk ... checkmk/check-mk-raw:2.1.0-latest
+docker exec checkmk -c 'apt update && apt -y install libtemplate-perl'
+```

@@ -8,7 +8,8 @@
 
 use strict;
 use warnings;
-
+use File::Compare;
+use File::Copy;
 use Template;
 
 # configuration
@@ -43,9 +44,13 @@ $tt->process( \*DATA, \%vars, "$HOME/tmp/autopb.hosts.mk " )
 # transfer hosts.mk into WATO folder autopb
 # rediscover new autopb hosts and restart CMK if needed
 if (
-`rsync -ci $HOME/tmp/autopb.hosts.mk $HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk`
-    ne "" )
+    !-f "$HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk"
+    || compare( "$HOME/tmp/autopb.hosts.mk",
+        "$HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk" ) != 0
+  )
 {
+    copy( "$HOME/tmp/autopb.hosts.mk",
+        "$HOME/etc/check_mk/conf.d/wato/autopb/hosts.mk" );
     my $newpbhosts = "";
     for my $h ( keys %PBHOSTS ) {
         $newpbhosts .= " $h" unless ( defined $OLDPBHOSTS{$h} );
