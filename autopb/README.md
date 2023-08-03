@@ -58,9 +58,11 @@ To install the script, follow the steps:
    every 15 minutes, and that the service configuration should be automatically
    updated in the mode _Refresh all services and host labels (Tabula rasa)_.
    Changes should be grouped for e.g. 5 minutes, and activated automatically.
-5. Run the `local/bin/autopb` script manually once. If there is piggyback
+5. In Checkmk, create a rule of type _Host check command_ in the `autopb` folder.
+   Under _Host check command_, select the option _Always assume host to be up_.
+6. Run the `local/bin/autopb` script manually once. If there is piggyback
    data available, this might take a while, as every new host is discovered.
-6. In `etc/cron.d/autopb`, create a cron job that runs the script e.g. every 15
+7. In `etc/cron.d/autopb`, create a cron job that runs the script e.g. every 15
    minutes:
    ```
    */15 * * * *  $HOME/local/bin/autopb
