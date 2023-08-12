@@ -106,6 +106,20 @@ To automate this, write a script that starts the container and immediately
 installs the needed packages, like this:
 
 ```bash
-docker run -d --name checkmk ... checkmk/check-mk-raw:2.1.0-latest
-docker exec checkmk -c 'apt update && apt -y install libtemplate-perl'
+docker run -d --name checkmk ... checkmk/check-mk-raw:2.2.0-latest
+docker exec checkmk -c 'apt-get update && apt-get -y install libtemplate-perl'
 ```
+
+If you use [watchtower](https://containrrr.dev/watchtower/) to continuously update
+running Docker containers to the latest images, you can signal watchtower to install
+the package after each update by setting a label, e.g.
+
+```bash
+docker run -d --name checkmk ... \
+  --label=com.centurylinklabs.watchtower.lifecycle.post-update="apt-get update && apt-get -y install libtemplate-perl" \
+  checkmk/check-mk-raw:2.2.0-latest
+docker exec checkmk -c 'apt-get update && apt-get -y install libtemplate-perl'
+```
+
+Btw, this method can also be used to install other useful packages into the Checkmk container,
+like `less` or a proper editor like `nano` or `joe`.
