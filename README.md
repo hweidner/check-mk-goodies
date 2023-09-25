@@ -302,6 +302,18 @@ This scripts should not be used on hosts that are part of a Kubernetes cluster.
 On such hosts, the docker containers are managed and kept up-to-date by Kubernetes.
 You might consider using the `k8s` local check explained below.
 
+## k3s_version
+
+When running [K3s](https://k3s.io/), the lightweight Kubernetes distribution from the
+[CNCF](https://www.cncf.io/), this script checks if a newer version K3s than the installed
+version is available upstream. It does this by downloading the K3s
+[channel list](https://update.k3s.io/v1-release/channels) and comparing the latest stable
+release against the output of `kubectl version`.
+
+This check should be cached, e.g. for 15 minutes, as it downloads the channel list every
+time it is executed. The status is OK when the versions match and WARN if a newer version
+of K3s is available.
+
 ## k8s (Kubernetes)
 
 The k8s local check script is an alternative approach to

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# (c) Harald Weidner, 2023-09-25
+# License: MIT
+#
+# Checkmk local check
+# Checks if a newer K3s version than the installed version is available
+#
+# example output:
+# 1 "K3s version" - Installed version is v1.27.4+k3s1, upstream version is v1.27.6+k3s1
+
+CHECK='"K3s version"'
+K3S_URL=https://update.k3s.io/v1-release/channels
+
+k3s_version=$(k3s kubectl version --short 2>/dev/null | grep "Server Version:"|cut -d" " -f3)
+k3s_upstream=$(curl -s --no-progress-meter $K3S_URL | jq -rc '.data | .[] | select(.id == "stable") | .latest')
+
+if [[ $k3s_version == $k3s_upstream ]]; then
+  echo "0 $CHECK - Version $k3s_version is the current version"
+else
+  echo "1 $CHECK - Installed version is $k3s_version, upstream version is $k3s_upstream"
+fi
+
