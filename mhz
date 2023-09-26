@@ -12,7 +12,7 @@
 if type lscpu >/dev/null 2>&1 ; then
   mhz=$(LANG='' lscpu | grep '^CPU MHz:' | awk '{ print $3 }')
   if [[ "$mhz" != "" ]]; then
-    echo "0 CPU_MHz mhz=$mhz CPU speed: $mhz MHz"
+    echo "0 \"CPU MHz\" mhz=$mhz CPU speed: $mhz MHz"
   fi
 fi
 

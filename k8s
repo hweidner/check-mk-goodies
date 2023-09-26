@@ -15,25 +15,26 @@ use warnings;
 
 # This configuration is for a MicroK8s Snap installation on Ubuntu 20.04 LTS.
 # Adapt for your needs!
-my $KUBECONFIG="/var/snap/microk8s/current/credentials/client.config";
-my $KUBECTL="/snap/bin/microk8s.kubectl";
+my $KUBECONFIG = "/var/snap/microk8s/current/credentials/client.config";
+my $KUBECTL    = "/snap/bin/microk8s.kubectl";
 
 #
 # Global variables
 #
 
-my $KC = "$KUBECTL --kubeconfig=$KUBECONFIG --no-headers --request-timeout=5s get";
+my $KC =
+  "$KUBECTL --kubeconfig=$KUBECONFIG --no-headers --request-timeout=5s get";
 my @STATUS = qw(OK WARN CRITICAL UNKNOWN);
 
-my @namespaces = (); # all namespaces
-my %pods_ns = ();    # pods by namespace
-my %pods_node = ();  # pods by node
-my %svc_ns = ();     # services by namespace
-my %deploy_ns = ();  # deployments by namespace
-my %ing_ns = ();     # ingress by namespace
-my %daem_ns = ();    # daemonsets by namespace
-my %repl_ns = ();    # replicasets by namespace
-my %sta_ns = ();     # statefulsets by namespace
+my @namespaces = ();    # all namespaces
+my %pods_ns    = ();    # pods by namespace
+my %pods_node  = ();    # pods by node
+my %svc_ns     = ();    # services by namespace
+my %deploy_ns  = ();    # deployments by namespace
+my %ing_ns     = ();    # ingress by namespace
+my %daem_ns    = ();    # daemonsets by namespace
+my %repl_ns    = ();    # replicasets by namespace
+my %sta_ns     = ();    # statefulsets by namespace
 
 #
 # execute checks and exit
@@ -51,25 +52,28 @@ mon_statefulsets();
 
 exit 0;
 
-
 #
 # Nodes
 #
 
 sub mon_nodes {
-	open(K, "$KC nodes -o wide |") || return;
-	my $count = 0;
-	while(<K>) {
-		chomp;
-		my ($name, $state, $roles, $age, $version, $ip, $ipext, $os, $kernel, $runtime) = split(/\s\s+/, $_);
-		my $st = ($state eq "Ready") ? 0 : 1;
-		print "$st K8s_Node_$name - Node: $name, State: $state Roles: $roles, Internal IP: $ip, ",
-			"External IP: $ipext, OS: $os, Kernel: $kernel, Container runtime: $runtime\n";
-		$pods_node{$name} = 0;
-		$count++;
-	}
-	close(K);
-	print "0 K8s_Nodes nodes=$count $count nodes configured\n";
+    open( K, "$KC nodes -o wide |" ) || return;
+    my $count = 0;
+    while (<K>) {
+        chomp;
+        my (
+            $name, $state, $roles, $age,    $version,
+            $ip,   $ipext, $os,    $kernel, $runtime
+        ) = split( /\s\s+/, $_ );
+        my $st = ( $state eq "Ready" ) ? 0 : 1;
+        print
+"$st \"K8s Node $name\" - Node: $name, State: $state Roles: $roles, Internal IP: $ip, ",
+"External IP: $ipext, OS: $os, Kernel: $kernel, Container runtime: $runtime\n";
+        $pods_node{$name} = 0;
+        $count++;
+    }
+    close(K);
+    print "0 \"K8s Nodes\" nodes=$count $count nodes configured\n";
 }
 
 #
@@ -77,25 +81,27 @@ sub mon_nodes {
 #
 
 sub mon_namespaces {
-	open(K, "$KC namespaces |") || return;
-	my $count = 0;
-	while(<K>) {
-		chomp;
-		my ($name, $status, $age) = split(/\s+/, $_);
-		my $st = ($status eq "Active") ? 0 : 1;
-		print "$st K8s_Namespace_$name - Namespace: $name, Status: $status, Age: $age\n";
-		push @namespaces, $name; # if($st == 0);
-		$pods_ns{$name} = 0;
-		$svc_ns{$name} = [];
-		$deploy_ns{$name} = [];
-		$ing_ns{$name} = [];
-		$daem_ns{$name} = [];
-		$repl_ns{$name} = [];
-		$sta_ns{$name} = [];
-		$count++;
-	}
-	close(K);
-	print "0 K8s_Namespaces namespaces=$count $count namespaces configured\n";
+    open( K, "$KC namespaces |" ) || return;
+    my $count = 0;
+    while (<K>) {
+        chomp;
+        my ( $name, $status, $age ) = split( /\s+/, $_ );
+        my $st = ( $status eq "Active" ) ? 0 : 1;
+        print
+"$st \"K8s Namespace $name\" - Namespace: $name, Status: $status, Age: $age\n";
+        push @namespaces, $name;    # if($st == 0);
+        $pods_ns{$name}   = 0;
+        $svc_ns{$name}    = [];
+        $deploy_ns{$name} = [];
+        $ing_ns{$name}    = [];
+        $daem_ns{$name}   = [];
+        $repl_ns{$name}   = [];
+        $sta_ns{$name}    = [];
+        $count++;
+    }
+    close(K);
+    print
+      "0 \"K8s Namespaces\" namespaces=$count $count namespaces configured\n";
 }
 
 #
@@ -103,21 +109,24 @@ sub mon_namespaces {
 #
 
 sub mon_pods {
-	open(K, "$KC pods -A -o wide 2>/dev/null |") || return;
-	my $count = 0;
-	while(<K>) {
-		chomp;
-		my ($ns, $name, $ready, $status, $restarts, $age, $ip, $node, $nominated, $readyness) = split(/\s+/, $_);
-		$pods_ns{$ns}++;
-		$pods_node{$node}++;
-		$count++;
-	}
-	close(K);
-	print "0 K8s_Pods pods=$count $count pods configured\n";
-	print "0 K8s_Pods_by_Namespace - Pods by namespace: ",
-		join(", ", map( { "$_: $pods_ns{$_}" } keys %pods_ns)), "\n";
-	print "0 K8s_Pods_by_Node - Pods by Node: ",
-		join(", ", map( { "$_: $pods_node{$_}" } keys %pods_node)), "\n";
+    open( K, "$KC pods -A -o wide 2>/dev/null |" ) || return;
+    my $count = 0;
+    while (<K>) {
+        chomp;
+        my (
+            $ns,  $name, $ready, $status,    $restarts,
+            $age, $ip,   $node,  $nominated, $readyness
+        ) = split( /\s+/, $_ );
+        $pods_ns{$ns}++;
+        $pods_node{$node}++;
+        $count++;
+    }
+    close(K);
+    print "0 \"K8s Pods\" pods=$count $count pods configured\n";
+    print "0 \"K8s Pods by Namespace\" - Pods by namespace: ",
+      join( ", ", map( { "$_: $pods_ns{$_}" } keys %pods_ns ) ), "\n";
+    print "0 \"K8s Pods by Node\" - Pods by Node: ",
+      join( ", ", map( { "$_: $pods_node{$_}" } keys %pods_node ) ), "\n";
 }
 
 #
@@ -125,26 +134,41 @@ sub mon_pods {
 #
 
 sub mon_services {
-	open(K, "$KC services -A 2>/dev/null |") || return;
-	my $count = 0;
-	while(<K>) {
-		chomp;
-		my ($ns, $name, $type, $ip, $ipext, $ports, $age) = split(/\s+/, $_);
-		push @{$svc_ns{$ns}}, { "name"=>$name, "desc"=>"type: $type, ip: $ip, ipext: $ipext, ports: $ports, age: $age" };
-		$count++;
-	}
-	close(K);
-	print "0 K8s_Services services=$count $count services configured\n";
-	for my $ns (sort keys %svc_ns) {
-		my $cnt = 1 + $#{$svc_ns{$ns}};
-		if($cnt > 0) {
-			print "0 K8s_Namespace_${ns}_Services services=$cnt Services in Namespace $ns: ",
-				join(", ", map { $_->{"name"} } sort { $a->{'name'} cmp $b->{'name'} } @{$svc_ns{$ns}}), "\\n",
-				join("\\n", map { "OK - $_->{'name'} $_->{'desc'}" } sort { $a->{'name'} cmp $b->{'name'} } @{$svc_ns{$ns}}), "\n";
-		} else {
-			print "0 K8s_Namespace_${ns}_Services services=0 No service in Namespace $ns\n";
-		}
-	}
+    open( K, "$KC services -A 2>/dev/null |" ) || return;
+    my $count = 0;
+    while (<K>) {
+        chomp;
+        my ( $ns, $name, $type, $ip, $ipext, $ports, $age ) =
+          split( /\s+/, $_ );
+        push @{ $svc_ns{$ns} },
+          {
+            "name" => $name,
+            "desc" =>
+              "type: $type, ip: $ip, ipext: $ipext, ports: $ports, age: $age"
+          };
+        $count++;
+    }
+    close(K);
+    print "0 \"K8s Services\" services=$count $count services configured\n";
+    for my $ns ( sort keys %svc_ns ) {
+        my $cnt = 1 + $#{ $svc_ns{$ns} };
+        if ( $cnt > 0 ) {
+            print
+"0 \"K8s Namespace ${ns} Services\" services=$cnt Services in Namespace $ns: ",
+              join( ", ",
+                map  { $_->{"name"} }
+                sort { $a->{'name'} cmp $b->{'name'} } @{ $svc_ns{$ns} } ),
+              "\\n",
+              join( "\\n",
+                map    { "OK - $_->{'name'} $_->{'desc'}" }
+                  sort { $a->{'name'} cmp $b->{'name'} } @{ $svc_ns{$ns} } ),
+              "\n";
+        }
+        else {
+            print
+"0 \"K8s Namespace ${ns} Services\" services=0 No service in Namespace $ns\n";
+        }
+    }
 }
 
 #
@@ -152,31 +176,52 @@ sub mon_services {
 #
 
 sub mon_deployments {
-	open(K, "$KC deployments -A 2>/dev/null |") || return;
-	my $count = 0;
-	while(<K>) {
-		chomp;
-		my ($ns, $name, $ready_desired, $up2date, $avail, $age) = split(/\s+/, $_);
-		my ($ready, $desired) = split( m#/#, $ready_desired);
-		my $st = 0;
-		$st = 1 if($ready != $desired || $up2date != $desired || $avail != $desired);
-		$st = 2 if($desired > 0 && ( $ready == 0 || $up2date == 0 || $avail == 0));
-		push @{$deploy_ns{$ns}}, { "name"=>$name, "status"=>$st, "desc"=>"desired: $desired, ready: $ready, up-to-date: $up2date, available: $avail" };
-		$count++;
-	}
-	close(K);
-	print "0 K8s_Deployments deployments=$count $count deployments configured\n";
-	for my $ns (sort keys %deploy_ns) {
-		my $cnt = 1 + $#{$deploy_ns{$ns}};
-		if($cnt > 0) {
-			print max(map { $_->{'status'} } @{$deploy_ns{$ns}}),
-				" K8s_Namespace_${ns}_Deployments deployment=$cnt Deployments in Namespace $ns: ",
-				join(", ", map { $_->{"name"} } sort { $a->{'name'} cmp $b->{'name'} } @{$deploy_ns{$ns}}), "\\n",
-				join("\\n", map { "$STATUS[$_->{'status'}] - $_->{'name'} $_->{'desc'}" } sort { $a->{'name'} cmp $b->{'name'} } @{$deploy_ns{$ns}}), "\n";
-		} else {
-			print "0 K8s_Namespace_${ns}_Deployments deployment=0 No deployment in Namespace $ns\n";
-		}
-	}
+    open( K, "$KC deployments -A 2>/dev/null |" ) || return;
+    my $count = 0;
+    while (<K>) {
+        chomp;
+        my ( $ns, $name, $ready_desired, $up2date, $avail, $age ) =
+          split( /\s+/, $_ );
+        my ( $ready, $desired ) = split( m#/#, $ready_desired );
+        my $st = 0;
+        $st = 1
+          if ( $ready != $desired
+            || $up2date != $desired
+            || $avail != $desired );
+        $st = 2
+          if ( $desired > 0
+            && ( $ready == 0 || $up2date == 0 || $avail == 0 ) );
+        push @{ $deploy_ns{$ns} },
+          {
+            "name"   => $name,
+            "status" => $st,
+            "desc"   =>
+"desired: $desired, ready: $ready, up-to-date: $up2date, available: $avail"
+          };
+        $count++;
+    }
+    close(K);
+    print
+"0 \"K8s Deployments\" deployments=$count $count deployments configured\n";
+    for my $ns ( sort keys %deploy_ns ) {
+        my $cnt = 1 + $#{ $deploy_ns{$ns} };
+        if ( $cnt > 0 ) {
+            print max( map { $_->{'status'} } @{ $deploy_ns{$ns} } ),
+" \"K8s Namespace ${ns} Deployments\" deployment=$cnt Deployments in Namespace $ns: ",
+              join( ", ",
+                map  { $_->{"name"} }
+                sort { $a->{'name'} cmp $b->{'name'} } @{ $deploy_ns{$ns} } ),
+              "\\n",
+              join( "\\n",
+                map    { "$STATUS[$_->{'status'}] - $_->{'name'} $_->{'desc'}" }
+                  sort { $a->{'name'} cmp $b->{'name'} } @{ $deploy_ns{$ns} } ),
+              "\n";
+        }
+        else {
+            print
+"0 \"K8s Namespace ${ns} Deployments\" deployment=0 No deployment in Namespace $ns\n";
+        }
+    }
 }
 
 #
@@ -184,26 +229,41 @@ sub mon_deployments {
 #
 
 sub mon_ingresses {
-	open(K, "$KC ingresses -A 2>/dev/null |") || return;
-	my $count = 0;
-	while(<K>) {
-		chomp;
-		my ($ns, $name, $class, $hosts, $addr, $ports, $age) = split(/\s+/, $_);
-		push @{$ing_ns{$ns}}, { "name"=>$name, "desc"=>"class: $class, hosts: $hosts, addr: $addr, ports: $ports, age: $age" };
-		$count++;
-	}
-	close(K);
-	print "0 K8s_Ingress ingress=$count $count ingresses configured\n";
-	for my $ns (sort keys %ing_ns) {
-		my $cnt = 1 + $#{$ing_ns{$ns}};
-		if($cnt > 0) {
-			print "0 K8s_Namespace_${ns}_Ingress ingress=$cnt Ingresses in namespace $ns: ",
-				join(", ", map { $_->{"name"} } sort { $a->{'name'} cmp $b->{'name'} } @{$ing_ns{$ns}}), "\\n",
-				join("\\n", map { "OK - $_->{'name'} $_->{'desc'}" } sort { $a->{'name'} cmp $b->{'name'} } @{$ing_ns{$ns}}), "\n";
-		} else {
-			print "0 K8s_Namespace_${ns}_Ingress ingress=0 No ingress in namespace $ns\n";
-		}
-	}
+    open( K, "$KC ingresses -A 2>/dev/null |" ) || return;
+    my $count = 0;
+    while (<K>) {
+        chomp;
+        my ( $ns, $name, $class, $hosts, $addr, $ports, $age ) =
+          split( /\s+/, $_ );
+        push @{ $ing_ns{$ns} },
+          {
+            "name" => $name,
+            "desc" =>
+"class: $class, hosts: $hosts, addr: $addr, ports: $ports, age: $age"
+          };
+        $count++;
+    }
+    close(K);
+    print "0 \"K8s Ingress\" ingress=$count $count ingresses configured\n";
+    for my $ns ( sort keys %ing_ns ) {
+        my $cnt = 1 + $#{ $ing_ns{$ns} };
+        if ( $cnt > 0 ) {
+            print
+"0 \"K8s Namespace ${ns} Ingress\" ingress=$cnt Ingresses in namespace $ns: ",
+              join( ", ",
+                map  { $_->{"name"} }
+                sort { $a->{'name'} cmp $b->{'name'} } @{ $ing_ns{$ns} } ),
+              "\\n",
+              join( "\\n",
+                map    { "OK - $_->{'name'} $_->{'desc'}" }
+                  sort { $a->{'name'} cmp $b->{'name'} } @{ $ing_ns{$ns} } ),
+              "\n";
+        }
+        else {
+            print
+"0 \"K8s Namespace ${ns} Ingress\" ingress=0 No ingress in namespace $ns\n";
+        }
+    }
 }
 
 #
@@ -211,30 +271,57 @@ sub mon_ingresses {
 #
 
 sub mon_daemonsets {
-	open(K, "$KC daemonsets -A 2>/dev/null |") || return;
-	my $count = 0;
-	while(<K>) {
-		chomp;
-		my ($ns, $name, $desired, $current, $ready, $up2date, $available) = split(/\s+/, $_);
-		my $st = 0;
-		$st = 1 if($current != $desired || $ready != $desired || $up2date != $desired || $available != $desired);
-		$st = 2 if($desired > 0 && ( $current == 0 || $ready == 0 || $up2date == 0 || $available == 0));
-		push @{$daem_ns{$ns}}, { "name"=>$name, "status"=>$st, "desc"=>"desired: $desired, current: $current, ready: $ready, up-to-date: $up2date, available: $available" };
-		$count++;
-	}
-	close(K);
-	print "0 K8s_Daemonsets daemonsets=$count $count daemonsets configured\n";
-	for my $ns (sort keys %daem_ns) {
-		my $cnt = 1 + $#{$daem_ns{$ns}};
-		if($cnt > 0) {
-			print max(map { $_->{'status'} } @{$daem_ns{$ns}}),
-				" K8s_Namespace_${ns}_Daemonsets daemonsets=$cnt Daemonsets in namespace $ns: ",
-				join(", ", map { $_->{"name"} } sort { $a->{'name'} cmp $b->{'name'} } @{$daem_ns{$ns}}), "\\n",
-				join("\\n", map { "$STATUS[$_->{'status'}] - $_->{'name'} $_->{'desc'}" } sort { $a->{'name'} cmp $b->{'name'} } @{$daem_ns{$ns}}), "\n";
-		} else {
-			print "0 K8s_Namespace_${ns}_Daemonsets daemonsets=0 No daemonset in namespace $ns\n";
-		}
-	}
+    open( K, "$KC daemonsets -A 2>/dev/null |" ) || return;
+    my $count = 0;
+    while (<K>) {
+        chomp;
+        my ( $ns, $name, $desired, $current, $ready, $up2date, $available ) =
+          split( /\s+/, $_ );
+        my $st = 0;
+        $st = 1
+          if ( $current != $desired
+            || $ready != $desired
+            || $up2date != $desired
+            || $available != $desired );
+        $st = 2
+          if (
+            $desired > 0
+            && (   $current == 0
+                || $ready == 0
+                || $up2date == 0
+                || $available == 0 )
+          );
+        push @{ $daem_ns{$ns} },
+          {
+            "name"   => $name,
+            "status" => $st,
+            "desc"   =>
+"desired: $desired, current: $current, ready: $ready, up-to-date: $up2date, available: $available"
+          };
+        $count++;
+    }
+    close(K);
+    print
+      "0 \"K8s Daemonsets\" daemonsets=$count $count daemonsets configured\n";
+    for my $ns ( sort keys %daem_ns ) {
+        my $cnt = 1 + $#{ $daem_ns{$ns} };
+        if ( $cnt > 0 ) {
+            print max( map { $_->{'status'} } @{ $daem_ns{$ns} } ),
+" \"K8s Namespace ${ns} Daemonsets\" daemonsets=$cnt Daemonsets in namespace $ns: ",
+              join( ", ",
+                map  { $_->{"name"} }
+                sort { $a->{'name'} cmp $b->{'name'} } @{ $daem_ns{$ns} } ),
+              "\\n",
+              join( "\\n",
+                map    { "$STATUS[$_->{'status'}] - $_->{'name'} $_->{'desc'}" }
+                  sort { $a->{'name'} cmp $b->{'name'} } @{ $daem_ns{$ns} } ),
+              "\n";
+        }
+        else {
+            print
+"0 \"K8s Namespace ${ns} Daemonsets\" daemonsets=0 No daemonset in namespace $ns\n";
+        }
+    }
 }
 
 #
@@ -242,30 +329,45 @@ sub mon_daemonsets {
 #
 
 sub mon_replicasets {
-	open(K, "$KC replicasets -A 2>/dev/null |") || return;
-	my $count = 0;
-	while(<K>) {
-		chomp;
-		my ($ns, $name, $desired, $current, $ready, $age) = split(/\s+/, $_);
-		my $st = 0;
-		$st = 1 if($current != $desired || $ready != $desired);
-		$st = 2 if($desired > 0 && ( $current == 0 || $ready == 0));
-		push @{$repl_ns{$ns}}, { "name"=>$name, "status"=>$st, "desc"=>"desired: $desired, current: $current, ready: $ready" };
-		$count++;
-	}
-	close(K);
-	print "0 K8s_Replicasets replicasets=$count $count replicasets configured\n";
-	for my $ns (sort keys %repl_ns) {
-		my $cnt = 1 + $#{$repl_ns{$ns}};
-		if($cnt > 0) {
-			print max(map { $_->{'status'} } @{$repl_ns{$ns}}),
-				" K8s_Namespace_${ns}_Replicasets replicasets=$cnt Replicasets in namespace $ns: ",
-				join(", ", map { $_->{"name"} } sort { $a->{'name'} cmp $b->{'name'} } @{$repl_ns{$ns}}), "\\n",
-				join("\\n", map { "$STATUS[$_->{'status'}] - $_->{'name'} $_->{'desc'}" } sort { $a->{'name'} cmp $b->{'name'} } @{$repl_ns{$ns}}), "\n";
-		} else {
-			print "0 K8s_Namespace_${ns}_Replicasets replicasets=0 No replicaset in namespace $ns\n";
-		}
-	}
+    open( K, "$KC replicasets -A 2>/dev/null |" ) || return;
+    my $count = 0;
+    while (<K>) {
+        chomp;
+        my ( $ns, $name, $desired, $current, $ready, $age ) =
+          split( /\s+/, $_ );
+        my $st = 0;
+        $st = 1 if ( $current != $desired || $ready != $desired );
+        $st = 2 if ( $desired > 0 && ( $current == 0 || $ready == 0 ) );
+        push @{ $repl_ns{$ns} },
+          {
+            "name"   => $name,
+            "status" => $st,
+            "desc"   => "desired: $desired, current: $current, ready: $ready"
+          };
+        $count++;
+    }
+    close(K);
+    print
+"0 \"K8s Replicasets\" replicasets=$count $count replicasets configured\n";
+    for my $ns ( sort keys %repl_ns ) {
+        my $cnt = 1 + $#{ $repl_ns{$ns} };
+        if ( $cnt > 0 ) {
+            print max( map { $_->{'status'} } @{ $repl_ns{$ns} } ),
+" \"K8s Namespace ${ns} Replicasets\" replicasets=$cnt Replicasets in namespace $ns: ",
+              join( ", ",
+                map  { $_->{"name"} }
+                sort { $a->{'name'} cmp $b->{'name'} } @{ $repl_ns{$ns} } ),
+              "\\n",
+              join( "\\n",
+                map    { "$STATUS[$_->{'status'}] - $_->{'name'} $_->{'desc'}" }
+                  sort { $a->{'name'} cmp $b->{'name'} } @{ $repl_ns{$ns} } ),
+              "\n";
+        }
+        else {
+            print
+"0 \"K8s Namespace ${ns} Replicasets\" replicasets=0 No replicaset in namespace $ns\n";
+        }
+    }
 }
 
 #
@@ -273,33 +375,46 @@ sub mon_replicasets {
 #
 
 sub mon_statefulsets {
-	open(K, "$KC statefulsets -A 2>/dev/null |") || return;
-	my $count = 0;
-	while(<K>) {
-		chomp;
-		my ($ns, $name, $ready_desired, $age) = split(/\s+/, $_);
-		my ($ready, $desired) = split( m#/#, $ready_desired);
-		my $st = 0;
-		$st = 1 if($ready != $desired);
-		$st = 2 if($desired > 0 && $ready == 0);
-		push @{$sta_ns{$ns}}, { "name"=>$name, "status"=>$st, "desc"=>"desired: $desired, ready: $ready, age: $age" };
-		$count++;
-	}
-	close(K);
-	print "0 K8s_Statefulsets statefulsets=$count $count statefulsets configured\n";
-	for my $ns (sort keys %sta_ns) {
-		my $cnt = 1 + $#{$sta_ns{$ns}};
-		if($cnt > 0) {
-			print max(map { $_->{'status'} } @{$sta_ns{$ns}}),
-				" K8s_Namespace_${ns}_Statefulsets statefulsets=$cnt Statefulsets in namespace $ns: ",
-				join(", ", map { $_->{"name"} } sort { $a->{'name'} cmp $b->{'name'} } @{$sta_ns{$ns}}), "\\n",
-				join("\\n", map { "$STATUS[$_->{'status'}] - $_->{'name'} $_->{'desc'}" } sort { $a->{'name'} cmp $b->{'name'} } @{$sta_ns{$ns}}), "\n";
-		} else {
-			print "0 K8s_Namespace_${ns}_Statefulsets statefulsets=0 No statefulset in namespace $ns\n";
-		}
-	}
+    open( K, "$KC statefulsets -A 2>/dev/null |" ) || return;
+    my $count = 0;
+    while (<K>) {
+        chomp;
+        my ( $ns, $name, $ready_desired, $age ) = split( /\s+/, $_ );
+        my ( $ready, $desired ) = split( m#/#, $ready_desired );
+        my $st = 0;
+        $st = 1 if ( $ready != $desired );
+        $st = 2 if ( $desired > 0 && $ready == 0 );
+        push @{ $sta_ns{$ns} },
+          {
+            "name"   => $name,
+            "status" => $st,
+            "desc"   => "desired: $desired, ready: $ready, age: $age"
+          };
+        $count++;
+    }
+    close(K);
+    print
+"0 \"K8s Statefulsets\" statefulsets=$count $count statefulsets configured\n";
+    for my $ns ( sort keys %sta_ns ) {
+        my $cnt = 1 + $#{ $sta_ns{$ns} };
+        if ( $cnt > 0 ) {
+            print max( map { $_->{'status'} } @{ $sta_ns{$ns} } ),
+" \"K8s Namespace ${ns} Statefulsets\" statefulsets=$cnt Statefulsets in namespace $ns: ",
+              join( ", ",
+                map  { $_->{"name"} }
+                sort { $a->{'name'} cmp $b->{'name'} } @{ $sta_ns{$ns} } ),
+              "\\n",
+              join( "\\n",
+                map    { "$STATUS[$_->{'status'}] - $_->{'name'} $_->{'desc'}" }
+                  sort { $a->{'name'} cmp $b->{'name'} } @{ $sta_ns{$ns} } ),
+              "\n";
+        }
+        else {
+            print
+"0 \"K8s Namespace ${ns} Statefulsets\" statefulsets=0 No statefulset in namespace $ns\n";
+        }
+    }
 }
-
 
 #
 # Helper functions
@@ -307,10 +422,9 @@ sub mon_statefulsets {
 
 # max returns the numerical maximum of the input list
 sub max {
-	my $result = shift;
-	foreach (@_) {
-		$result = $_ if($result < $_);
-	}
-	return $result;
+    my $result = shift;
+    foreach (@_) {
+        $result = $_ if ( $result < $_ );
+    }
+    return $result;
 }
-

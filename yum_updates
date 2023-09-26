@@ -13,9 +13,8 @@
 if type yum >/dev/null 2>&1 ; then
   updates=$(yum updateinfo list updates sec -q | wc -l)
   if [[ $updates -gt 0 ]]; then
-    echo "2 YUM_Updates updates=$updates $updates pending security updates"
+    echo "2 \"YUM Updates\" updates=$updates $updates pending security updates"
   else
-    echo "0 YUM_Updates updates=0 No pending security updates"
+    echo "0 \"YUM Updates\" updates=0 No pending security updates"
   fi
 fi
-

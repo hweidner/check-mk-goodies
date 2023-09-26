@@ -11,7 +11,7 @@
 # 
 # 0 Reboot_needed - No system reboot needed
 
-CHECK=Reboot_needed
+CHECK='"Reboot needed"'
 SEVERITY=2  # 1=WARN, 2=CRIT
 
 [[ -f /etc/os-release ]] && source /etc/os-release
@@ -45,4 +45,3 @@ elif [[ $ID == "debian" || $ID_LIKE == "debian" || $ID == "ubuntu" || $ID_LIKE =
     echo "0 $CHECK - No system reboot needed"
   fi
 fi
-

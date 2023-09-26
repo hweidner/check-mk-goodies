@@ -15,21 +15,21 @@ use strict;
 use warnings;
 
 for my $file (</var/run/keepalived.*.*.state>) {
-	open(IN, $file) || next;
-	while(<IN>) {
-		chomp;
-		my ($type, $name, $state) = split(":", $_);
-		next if($type ne "INSTANCE");
+    open( IN, $file ) || next;
+    while (<IN>) {
+        chomp;
+        my ( $type, $name, $state ) = split( ":", $_ );
+        next if ( $type ne "INSTANCE" );
 
-		my $st;
-		if($state =~ m/^(MASTER|BACKUP)$/)  { $st = 0; }
-		elsif($state eq "FAULT")            { $st = 2; }
-		else                                { $st = 3; }
+        my $st;
+        if    ( $state =~ m/^(MASTER|BACKUP)$/ ) { $st = 0; }
+        elsif ( $state eq "FAULT" )              { $st = 2; }
+        else                                     { $st = 3; }
 
-		print "$st Keepalived_VRRP_$name - VRRP instance $name is in state $state.\n";
-	}
-	close(IN);
+        print
+"$st \"Keepalived VRRP $name\" - VRRP instance $name is in state $state.\n";
+    }
+    close(IN);
 }
 
 exit 0;
-

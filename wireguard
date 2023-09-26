@@ -24,30 +24,37 @@ use warnings;
 
 my %WG = ();
 
-open(WG, "/usr/bin/wg show all dump |") || die;
-while(<WG>) {
-	chomp;
-	if(/^(\w+)\s+[\w\/\+]+=\s+([\w\/\+]+=)\s+(\d+)\s/) {
-		# Wireguard interface
-		my ($if, $pubkey, $port) = ($1, $2, $3);
-		$WG{$if} = {
-			if     => $if,
-			pubkey => $pubkey,
-			port   => $port,
-			count  => 0,
-			active => 0,
-		};
-	} else {
-		# Peers
-		my ($if, $pubkey, $psk, $endpoint, $allowedips, $handshake, $rx, $tx, $keepalive) = split(/\s+/, $_);
-		$WG{$if}->{"count"}++;
-		$WG{$if}->{"active"}++ if($handshake != 0 && time - $handshake <= 300);
-	}
+open( WG, "/usr/bin/wg show all dump |" ) || die;
+while (<WG>) {
+    chomp;
+    if (/^(\w+)\s+[\w\/\+]+=\s+([\w\/\+]+=)\s+(\d+)\s/) {
+
+        # Wireguard interface
+        my ( $if, $pubkey, $port ) = ( $1, $2, $3 );
+        $WG{$if} = {
+            if     => $if,
+            pubkey => $pubkey,
+            port   => $port,
+            count  => 0,
+            active => 0,
+        };
+    }
+    else {
+        # Peers
+        my (
+            $if,        $pubkey, $psk, $endpoint, $allowedips,
+            $handshake, $rx,     $tx,  $keepalive
+        ) = split( /\s+/, $_ );
+        $WG{$if}->{"count"}++;
+        $WG{$if}->{"active"}++
+          if ( $handshake != 0 && time - $handshake <= 300 );
+    }
 }
 close(WG);
 
-for my $if (sort keys %WG) {
-	my $wg = $WG{$if};
-	print "0 Wireguard_$if active=$wg->{'active'} Wireguard interface $if: Port $wg->{'port'}, $wg->{'active'}/$wg->{'count'} active peers, PubKey $wg->{'pubkey'}\n";
+for my $if ( sort keys %WG ) {
+    my $wg = $WG{$if};
+    print
+"0 \"Wireguard $if\" active=$wg->{'active'} Wireguard interface $if: Port $wg->{'port'}, $wg->{'active'}/$wg->{'count'} active peers, PubKey $wg->{'pubkey'}\n";
 }
 

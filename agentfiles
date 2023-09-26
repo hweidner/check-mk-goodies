@@ -10,8 +10,11 @@
 #
 # example output:
 # 
-# 2 Checkmk_Agent_Files_default - 1 huge and 3 large cached agent files (warn/crit at 2MB/16MB): server1 server2 server3 server4
+# 2 "Checkmk Agent Files cmk" - 1 huge and 3 large cached agent files (warn/crit at 2MB/16MB): server1 server2 server3 server4
 
+
+# Name (prefix) of check
+CHECK="Checkmk Agent Files"
 
 # Keep last command in pipe in current shell
 shopt -s lastpipe
@@ -45,12 +48,11 @@ for site in *; do
   done
 
   case $status in
-    0) echo "0 Checkmk_Agent_Files_$site - No huge cached agent files" ;;
-    1) echo "1 Checkmk_Agent_Files_$site - $warncount large cached agent files (warn >$WARNSIZE):$warnings" ;;
-    2) echo "2 Checkmk_Agent_Files_$site - $critcount huge and $warncount large cached agent files (warn/crit at $WARNSIZE/$CRITSIZE):$criticals$warnings" ;;
-    *) echo "3 Checkmk_Agent_Files_$site - An unknown error occured"
+    0) echo "0 \"$CHECK $site\" - No huge cached agent files" ;;
+    1) echo "1 \"$CHECK $site\" - $warncount large cached agent files (warn >$WARNSIZE):$warnings" ;;
+    2) echo "2 \"$CHECK $site\" - $critcount huge and $warncount large cached agent files (warn/crit at $WARNSIZE/$CRITSIZE):$criticals$warnings" ;;
+    *) echo "3 \"$CHECK $site\" - An unknown error occured"
   esac
 done
 
 exit 0
-

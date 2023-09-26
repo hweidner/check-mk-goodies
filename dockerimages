@@ -12,6 +12,8 @@
 # 
 # 0 Docker_Images - All Docker containers run on up-to-date images
 
+CHECK='"Docker Images"'
+
 # Cache file (filled by cron job dockerinspect.sh)
 CACHE=/var/local/cache/dockerimages.cache
 
@@ -48,9 +50,9 @@ done < $CACHE
 
 # Print Checkmk local script output
 if [[ -n $out ]]; then
-  echo "2 Docker_Images - Docker containers running on outdated images:$out"
+  echo "2 $CHECK - Docker containers running on outdated images:$out"
 else
-  echo "0 Docker_Images - All Docker containers run on up-to-date images"
+  echo "0 $CHECK - All Docker containers run on up-to-date images"
 fi
 
 exit 0
