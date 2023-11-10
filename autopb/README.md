@@ -2,12 +2,13 @@
 
 The autopb script automatically creates hosts in Checkmk when
 [piggyback](https://docs.checkmk.com/latest/en/piggyback.html) data
-is available. It supports only the Checkmk Raw edition, version 2.1
-(developed and tested with 2.1.0p14).
+is available. It supports only the Checkmk Raw edition, version 2.1/2.2
+(developed with 2.1.0p14, tested with current 2.1 and 2.2 versions).
 
 This is very basically what the
 [Checkmk Dynamic Configuration Daemon (DCD)](https://docs.checkmk.com/latest/en/dcd.html)
-and its piggyback connector does, which is only available in the Enterprise edition.
+and its piggyback connector does, which is only available in the Enterprise, Cloud
+and Managed Services editions.
 
 In Checkmk, many buildin checks create piggyback data. Examples are the the
 special agents for VMware, Proxmox VE or Kubernetes, or the agent plugin for Docker.
@@ -99,7 +100,7 @@ again.
 ## Notes for Checkmk Docker image
 
 When you run Checkmk from the official Docker image, the Perl Template Toolkit
-is not installed. You can install it manually (the image is based on Debian 10),
+is not installed. You can install it manually (the image is based on Ubuntu LTS),
 but this needs to be repeated on every new release.
 
 To automate this, write a script that starts the container and immediately
