@@ -32,8 +32,8 @@ with `cmk -R`, which is the recommended way on the Checkmk Raw Edition.
 The automatically created host objects have their piggyback sources configured
 as parents, so that the parent-child relationship is used in notifications and
 in the topology graph. Besides that, they are rather dumb. They do not have an
-IP address nor get their UP/DOWN state checked in any way. There are solely
-there to display the collected piggyback data.
+IP address nor get their UP/DOWN state checked in any way. They are solely
+there as containers for displaying the available piggyback data.
 
 While having some shortcomings (see below), this solution makes it more
 comfortable to use checks with piggyback data. It is especially helpful when
@@ -46,8 +46,8 @@ manually.
 
 To install the script, follow the steps:
 
-1. Install the `autopb` script under `local/bin` of your Checkmk site and make
-   it executable.
+1. Install the `autopb` script under `$OMD_ROOT/local/bin` of your Checkmk site
+   and make it executable.
 2. Install the Perl Template Toolkit. E.g. on Debian or Ubuntu, do
    ```bash
    # apt install libtemplate-perl
@@ -61,10 +61,10 @@ To install the script, follow the steps:
    Changes should be grouped for e.g. 5 minutes, and activated automatically.
 5. In Checkmk, create a rule of type _Host check command_ in the `autopb` folder.
    Under _Host check command_, select the option _Always assume host to be up_.
-6. Run the `local/bin/autopb` script manually once. If there is piggyback
+6. Run the `$OMD_ROOT/local/bin/autopb` script manually once. If there is piggyback
    data available, this might take a while, as every new host is discovered.
-7. In `etc/cron.d/autopb`, create a cron job that runs the script e.g. every 15
-   minutes:
+7. In `$OMD_ROOT/etc/cron.d/autopb`, create a cron job that runs the script e.g.
+   every 15 minutes:
    ```
    */15 * * * *  $HOME/local/bin/autopb
    ```
@@ -81,6 +81,7 @@ Every automatically created host object belongs to the `autopb` WATO folder.
 This is different from the DCD, where it is possible to attach the dynamically
 created hosts to different folders, depending on the host where the piggyback
 data originated.
+
 The Checkmk Enterprise edition and the DCD approach gives you more power to avoid
 naming conflicts, e.g. by translating hostnames according to the folder. With
 the autobp solution, it can be difficult to monitor several Docker hosts or
@@ -97,7 +98,7 @@ and create a new host in another folder, make sure that this happens not interru
 by a new run of the `autopb` script. Otherwise, the host object would be created
 again.
 
-## Notes for Checkmk Docker image
+## Notes on the Checkmk Docker image
 
 When you run Checkmk from the official Docker image, the Perl Template Toolkit
 is not installed. You can install it manually (the image is based on Ubuntu LTS),
@@ -122,5 +123,5 @@ docker run -d --name checkmk ... \
 docker exec checkmk -c 'apt-get update && apt-get -y install libtemplate-perl'
 ```
 
-Btw, this method can also be used to install other useful packages into the Checkmk container,
-like `less` or a proper editor like `nano` or `joe`.
+By the way, this method can also be used to install other useful packages into the
+Checkmk container, like `less` or a proper editor like `nano` or `joe`.
