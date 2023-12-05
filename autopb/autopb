@@ -179,7 +179,7 @@ explicit_host_conf['parents'].update({
 # Host attributes (needed for WATO)
 host_attributes.update({
 [% FOREACH host IN pbhosts -%]
-  '[% host.key %]': {'meta_data': {'created_at': 0.0, 'created_by': 'omdadmin', 'updated_at': 0.0},
+  '[% host.key %]': {'meta_data': {'created_at': 0.0, 'created_by': 'cmkadmin', 'updated_at': 0.0},
                      'parents': [ '[% host.value.join("', '") %]' ]},
 [% END -%]
 })
