@@ -12,7 +12,7 @@
 CHECK='"K3s version"'
 K3S_URL=https://update.k3s.io/v1-release/channels
 
-k3s_version=$(k3s kubectl version --short 2>/dev/null | grep "Server Version:"|cut -d" " -f3)
+k3s_version=$(k3s kubectl version 2>/dev/null | grep "Server Version:"|cut -d" " -f3)
 k3s_upstream=$(curl -s --no-progress-meter $K3S_URL | jq -rc '.data | .[] | select(.id == "stable") | .latest')
 
 if [[ -z $k3s_version || -z $k3s_upstream ]]; then
