@@ -38,7 +38,7 @@ for my $F (qw(CPU Memory IO)) {
                 $vars =
 "psi_${f}_${scope}_avg60=$avg60;$WARNsome60;$CRITsome60;0;100|psi_${f}_${scope}_avg300=$avg300;$WARNsome300;$CRITsome300;0;100";
             }
-            else {
+            elsif ( $f ne "cpu" ) {
                 $vars .=
 "|psi_${f}_${scope}_avg60=$avg60;$WARNfull60;$CRITfull60;0;100|psi_${f}_${scope}_avg300=$avg300;$WARNfull300;$CRITfull300;0;100";
             }
