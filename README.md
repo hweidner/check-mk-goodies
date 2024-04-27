@@ -112,8 +112,10 @@ that at least one process is stalled through memory or I/O pressure, while
 "full" means that all processes are stalled. The CPU check has only "some"
 values, as it is impossible that all processes are stalled due to CPU pressure.
 
-See [Tracking pressure-stall information](https://lwn.net/Articles/759781/) and
+See [Tracking pressure-stall information](https://lwn.net/Articles/759781/),
 [psi: pressure stall information for CPU, memory, and IO v2](https://lwn.net/Articles/759658/)
+and
+[Linux Pressure Stall Information (PSI) by Example](https://unixism.net/2019/08/linux-pressure-stall-information-psi-by-example/)
 for details on how pressure stall infomation work.
 
 As the output of this check is very dynamic, it should not be cached by the
