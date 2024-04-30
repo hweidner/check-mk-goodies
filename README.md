@@ -7,12 +7,12 @@ Most of the scripts are
 [Checkmk local checks](https://checkmk.com/cms_localchecks.html).
 They are used together with the Checkmk Linux agent.
 
-**Some of these scripts do not work with Checkmk 2.0.0 and 2.0.0p1, due to
-a bug in the "local" check plugin.**
+**Some of the local scripts do not work with Checkmk 2.0.0 and 2.0.0p1, due
+to a bug in the "local" check plugin.**
 Use Checkmk version 2.0.0p2 or newer, and ensure to install the latest Linux
-agent on all monitored systems. Most of the checks are no longer compatible
-to Checkmk 1.6 or older versions. The autobp script requires Checkmk 2.1 or
-2.2.
+agent on all monitored systems. The checks are no longer compatible
+to Checkmk 1.6 or older versions. The autobp script requires at least Checkmk
+2.1.
 
 ## Installation
 
