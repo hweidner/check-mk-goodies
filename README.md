@@ -78,6 +78,15 @@ Example output in Checkmk console:
 
 ![lscpu multiline example](img/lscpu_multiline.png "lscpu multiline example")
 
+## cpulevel
+
+This Python script resolves wether the CPU complies to the x86-64-v1, v2, v3 or v4
+specifications, as defined by the
+[x86-64 microarchitecture levels](https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels).
+
+The check is WARN if the CPU level cannot be determined (eg. if /proc/cpuinfo cannot be read, or
+if the CPU has another architecture than x86_64). Otherwise, is is OK.
+
 ## mhz
 
 The ''mhz'' handles the "CPU MHz" output of the [lscpu](https://linux.die.net/man/1/lscpu)
