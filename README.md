@@ -84,8 +84,8 @@ This Python script resolves wether the CPU complies to the x86-64-v1, v2, v3 or 
 specifications, as defined by the
 [x86-64 microarchitecture levels](https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels).
 
-The check is WARN if the CPU level cannot be determined (eg. if /proc/cpuinfo cannot be read, or
-if the CPU has another architecture than x86_64). Otherwise, is is OK.
+The check result is WARN if the CPU level cannot be determined (eg. if /proc/cpuinfo cannot be
+read, or if the CPU has another architecture than x86_64). Otherwise, is is OK.
 
 ## mhz
 
@@ -120,6 +120,12 @@ The memory and I/O checks give "some" and "full" values, where "some" means
 that at least one process is stalled through memory or I/O pressure, while
 "full" means that all processes are stalled. The CPU check has only "some"
 values, as it is impossible that all processes are stalled due to CPU pressure.
+(Newer kernel versions also report "full" values for CPU pressure, but the data
+is always zero. The check script hence filters them out.)
+
+Some later kernels also report IRQ pressure, e.g. from RHEL 9 and derivates. Note
+that on RHEL 9, PSI are switched off by default; to enable them, use the kernel
+cmdline parameter `psi=1`.
 
 See [Tracking pressure-stall information](https://lwn.net/Articles/759781/),
 [psi: pressure stall information for CPU, memory, and IO v2](https://lwn.net/Articles/759658/)
