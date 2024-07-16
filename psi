@@ -24,8 +24,8 @@ my ( $CRITsome60, $CRITsome300, $CRITfull60, $CRITfull300 ) =
 
 # psi check
 for my $F (qw(CPU Memory IO IRQ)) {
-    my $f = lc($F);
-    my $vars;
+    my $f    = lc($F);
+    my $vars = "";
     open( IN, "< /proc/pressure/$f" ) || next;
     while (<IN>) {
         if (
