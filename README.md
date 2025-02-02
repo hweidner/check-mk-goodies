@@ -28,13 +28,13 @@ Checkmk agent (e.g. `chmod 755 <Checkname>`).
 ## autopb (automatic piggyback host creation)
 
 The `autopb` script is not a local check, but a cron job which runs under
-the Checkmk site user. It automatically creates missing host objecs in Checkmk
+the Checkmk site user. It automatically creates missing host objects in Checkmk
 when piggyback data ia available. See the [autopb](autopb/) directory for more
 information.
 
 ## osinfo
 
-This shell script makes some informations about the Linux OS available to
+This shell script makes some information about the Linux OS available to
 the Checkmk monitoring console. Those are:
 
 * [uname](https://linux.die.net/man/1/uname) system and kernel information
@@ -52,7 +52,7 @@ get yellow or red.
 
 The output of the osinfo script is rather static. It is therefore sufficient
 to check it once an hour or even less. This can be achieved by putting the
-script in a subdirecory called '3600', where the name denotes the number
+script in a subdirectory called '3600', where the name denotes the number
 of seconds until a cached output is renewed.
 
 Example output in Checkmk console:
@@ -106,7 +106,7 @@ Example output in Checkmk console:
 
 ![mhz example](img/mhz.png "mhz example")
 
-## psi (Pressure Stall Informations)
+## psi (Pressure Stall Information)
 
 This local check script handles the new
 [pressure stall information (PSI)](https://www.kernel.org/doc/html/latest/accounting/psi.html)
@@ -131,7 +131,7 @@ See [Tracking pressure-stall information](https://lwn.net/Articles/759781/),
 [psi: pressure stall information for CPU, memory, and IO v2](https://lwn.net/Articles/759658/)
 and
 [Linux Pressure Stall Information (PSI) by Example](https://unixism.net/2019/08/linux-pressure-stall-information-psi-by-example/)
-for details on how pressure stall infomation work.
+for details on how pressure stall information work.
 
 As the output of this check is very dynamic, it should not be cached by the
 agent (e.g. put it in the local script directory, not one of it's
@@ -156,7 +156,7 @@ On a CentOS, Red Hat, Oracle Linux or similar system with the
 this script checks for available security updates. The state is CRIT (red)
 if there are pending security updates, and OK (green) otherwise.
 
-The check consumes a small but measureable CPU load. I'd recommend to put it
+The check consumes a small but measurable CPU load. I'd recommend to put it
 in a subdirectory named 900, so the check is executed only once in 15 minutes.
 
 Note that Checkmk comes with agent plugins for APT (Debian/Ubuntu) and Zypper
@@ -171,7 +171,7 @@ available. In contrast to RPM or DEB based distributions, there is no way to
 distinguish between security and other updates, so the check status is CRIT if
 there are pending updates, and OK otherwise.
 
-To safe bandwith, the check accepts the cached APK packages until it is older
+To safe bandwidth, the check accepts the cached APK packages until it is older
 than one hour.
 
 Although the Checkmk requires the Bash shell to be installed, this check works with
@@ -265,7 +265,7 @@ The check consists of two scripts that must be used together:
 
 The script job `dockerimages_cron` needs to be run by cron, e.g. every couple
 of hours. You can put it into the `/etc/cron.hourly` directory, or create a
-separate cron job for it. The latter has the advantage that the job itselves
+separate cron job for it. The latter has the advantage that the job itself
 can be monitored with the `mk-job` utility:
 
 	# file /etc/cron.d/dockerimages
@@ -302,7 +302,7 @@ of the cron job.
 If you run Docker, consider also to install the [official Checkmk agent plugin
 for Docker](https://docs.checkmk.com/latest/en/monitoring_docker.html)
 and use the [DCD piggyback connector](https://docs.checkmk.com/latest/en/dcd.html),
-or the [autopb](autopb/) skript on the Checkmk Raw edition, to make monitoring
+or the [autopb](autopb/) script on the Checkmk Raw edition, to make monitoring
 information for the containers available.
 
 ### Caveats
@@ -310,7 +310,7 @@ information for the containers available.
 From time to time, it happens that an image gets a new repository digest
 although its content did not change. In this case, the `docker pull`
 command prints the output "Image is already up to date". In this case, it
-is not neccessary to recreate the container; the Checkmk message will
+is not necessary to recreate the container; the Checkmk message will
 disappear after the next check.
 
 You can view such images with the docker command:
@@ -375,13 +375,13 @@ mechanism. This has several implications:
   Kubernetes system services from different clusters will appear under the
   same host name. You need complex translation rules to separate them.
 
-In contrast to the buildin Kubernetes monitoring, the `k8s` local check offers
+In contrast to the builtin Kubernetes monitoring, the `k8s` local check offers
 a rather conservative approach to Kubernetes monitoring.
 
 The script is installed on one (or more) hosts of the Kubernetes cluster, or on
 a separate control node which has access to the cluster. It requires the `kubectl`
 binary and a KUBECONFIG file with the credentials to access the cluster and read
-the informations on all nodes, namespaces, pods, services, deployments, ingresses,
+the information on all nodes, namespaces, pods, services, deployments, ingresses,
 statefulsets, daemonsets, and replicasets. The output consists of a quite constant
 set of check items:
 
