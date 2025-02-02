@@ -164,6 +164,19 @@ Note that Checkmk comes with agent plugins for APT (Debian/Ubuntu) and Zypper
 subdirectory of the Checkmk agent. That's why the local check here does not
 consider Debian/Ubuntu or SUSE systems.
 
+## apk_updates
+
+On Alpine Linux, this script checks wether there are updates APK packages
+available. In contrast to RPM or DEB based distributions, there is no way to
+distinguish between security and other updates, so the check status is CRIT if
+there are pending updates, and OK otherwise.
+
+To safe bandwith, the check accepts the cached APK packages until it is older
+than one hour.
+
+Although the Checkmk requires the Bash shell to be installed, this check works with
+the default Bourne shell, as this is the default on Alpine Linux.
+
 ## reboot
 
 This script checks if a reboot is pending after package installations or updates.

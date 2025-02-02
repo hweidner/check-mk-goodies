@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# (c) 2025 by Harald Weidner
+# License: MIT
+#
+# Checkmk local check
+# displays informations about pending Alpine (APK) package updates
+#
+# example output:
+#
+# 2 "APK updates" updates=5 There are 5 updates available.
+
+CHECK='"APK updates"'
+
+if type apk >/dev/null 2>&1 ; then
+  updates=$(apk list -u --cache-max-age 60 | wc -l)
+  if [ "$updates" -gt 0 ]; then
+    echo "2 $CHECK updates=$updates There are $updates updates available."
+  else
+    echo "0 $CHECK updates=0 No updates available."
+  fi
+fi
+
+exit 0
