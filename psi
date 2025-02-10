@@ -46,7 +46,7 @@ for my $F (qw(CPU Memory IO IRQ)) {
         }
     }
     close(IN);
-    print "P \"PSI ${F}\" $vars PSI $f pressure\n";
+    print "P \"PSI ${F}\" $vars PSI $F pressure\n";
 }
 
 exit 0;

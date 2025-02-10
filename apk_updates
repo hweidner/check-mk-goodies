@@ -4,7 +4,7 @@
 # License: MIT
 #
 # Checkmk local check
-# displays informations about pending Alpine (APK) package updates
+# displays information about pending Alpine (APK) package updates
 #
 # example output:
 #
