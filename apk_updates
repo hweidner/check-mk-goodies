@@ -13,7 +13,8 @@
 CHECK='"APK updates"'
 
 if type apk >/dev/null 2>&1 ; then
-  updates=$(apk list -u --cache-max-age 60 | wc -l)
+  apk update > /dev/null 2>&1
+  updates=$(apk list -u | wc -l)
   if [ "$updates" -gt 0 ]; then
     echo "2 $CHECK updates=$updates There are $updates updates available."
   else

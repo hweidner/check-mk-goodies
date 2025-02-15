@@ -171,11 +171,13 @@ available. In contrast to RPM or DEB based distributions, there is no way to
 distinguish between security and other updates, so the check status is CRIT if
 there are pending updates, and OK otherwise.
 
-To safe bandwidth, the check accepts the cached APK packages until it is older
-than one hour.
+The check needs to update the package cache first. To safe bandwidth, it should be
+cached for e.g. 15 minutes.
 
-Although the Checkmk requires the Bash shell to be installed, this check works with
-the default Bourne shell, as this is the default on Alpine Linux.
+Note: to run the Checkmk agent under Alpine Linux, the Pakages `bash` and `procps`
+need to be installed. There is no pre-packaged Checkmk agent for Alpine available,
+but the script `check_mk_agent.linux` can be deployed e.g. unter `/usr/local/sbin`
+and executed over a SSH connection.
 
 ## reboot
 
