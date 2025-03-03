@@ -22,8 +22,8 @@ if type /usr/bin/needs-restarting >/dev/null 2>&1; then
   reboot=$(/usr/bin/needs-restarting -r | tr '\n' ' ')
   ret=$?
 
-  if [[ -z $restart ]]; then
-    restart="(empty output of needs-restarting -r)"
+  if [[ -z $reboot ]]; then
+    reboot="(empty output of needs-restarting -r)"
   fi
 
   if [[ $ret -ne 0 ]]; then
