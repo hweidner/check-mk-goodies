@@ -14,11 +14,12 @@ CHECK='"APK updates"'
 
 if type apk >/dev/null 2>&1 ; then
   apk update > /dev/null 2>&1
-  updates=$(apk list -u | wc -l)
-  if [ "$updates" -gt 0 ]; then
-    echo "2 $CHECK updates=$updates There are $updates updates available."
+  updates=$(apk list -u | cut -d' ' -f1 | tr '\n' ' ')
+  num_updates=$(echo $updates | wc -w)
+  if [ -n "$updates" ]; then
+    echo "2 $CHECK updates=$num_updates $num_updates updates available: $updates"
   else
-    echo "0 $CHECK updates=0 No updates available."
+    echo "0 $CHECK updates=0 No updates available"
   fi
 fi
 
