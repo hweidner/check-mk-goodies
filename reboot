@@ -6,7 +6,8 @@
 # Checkmk local check
 # Checks wether a system reboot is needed, e.g. after a kernel update.
 # Currently, Alpine Linux, Debian/Ubuntu and Red Hat and their derivates are supported.
-# On Alpine, the script only checks for an updated kernel version.
+# On Alpine, the script only checks for an updated kernel version, and only if it runs
+# with an own kernel, not in a container.
 #
 # example output:
 # 
@@ -48,12 +49,14 @@ elif [[ $ID == "debian" || $ID_LIKE == "debian" || $ID == "ubuntu" || $ID_LIKE =
 
 # Alpine Linux
 elif [[ $ID == "alpine" || $ID_LIKE == "alpine" ]]; then
-  running=$(uname -r)
-  installed=$(ls /boot/config-* | tail -1 | cut -d- -f2-)
-  if [[ $running == $installed ]]; then
-    echo "0 $CHECK - Running with the latest installed kernel $running. No reboot needed."
-  else
-    echo "$SEVERITY $CHECK - Running kernel $running, installed kernel $installed. Reboot is needed."
+  if [[ -d /boot ]]; then
+    running=$(uname -r)
+    installed=$(ls /boot/config-* | tail -1 | cut -d- -f2-)
+    if [[ $running == $installed ]]; then
+      echo "0 $CHECK - Running with the latest installed kernel $running. No reboot needed."
+    else
+      echo "$SEVERITY $CHECK - Running kernel $running, installed kernel $installed. Reboot is needed."
+    fi
   fi
 fi
 

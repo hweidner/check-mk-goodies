@@ -188,7 +188,9 @@ Under Red Hat, the check evaluates the output of the `needs-restarting -r`
 command. On Debian-like systems, the files `/run/reboot-required` and
 `/run/reboot-required.pkgs` are evaluated, according to [section 9.12 of the
 Debian Policy Manual](https://www.debian.org/doc/debian-policy/ch-opersys.html#signaling-that-a-reboot-is-required).
-On Alpine Linux, the script only checks for an updated kernel.
+
+On Alpine Linux, the script only checks for an updated kernel. If the Alpine system
+is running in an LXC container without its own kernel, the check does nothing.
 
 ## wireguard
 
