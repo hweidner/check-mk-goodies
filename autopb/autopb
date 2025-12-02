@@ -37,7 +37,7 @@ getpbhosts();
 
 # process hosts.mk template
 my %vars = ( pbhosts => \%PBHOSTS, site => $SITE );
-$tt->process( \*DATA, \%vars, "$HOME/tmp/autopb.hosts.mk " )
+$tt->process( \*DATA, \%vars, "$HOME/tmp/autopb.hosts.mk" )
   || die
   "CRIT: Template hosts.mk.tt could not be processed to tmp/autopb.hosts.mk.\n";
 
