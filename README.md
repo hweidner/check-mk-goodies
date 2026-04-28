@@ -236,13 +236,14 @@ keepalived instance notification script is added to notify the VRRP instance
 state into a file under /var/run, and the local check reads it from here.
 
   1. In the keepalived configuration file `/etc/keepalived/keepalived.conf`,
-     put the line `notify /etc/keepalived/keepalive_notify` into each
+     put the line `notify /etc/keepalived/keepalived_notify` into each
      VRRP_instance block that should be monitored.
   2. Copy the shell script `keepalived_notify` into the directory `/etc/keepalived/`
      and make it executable (`chmod 755 /etc/keepalived/keepalived_notify`).
   3. Copy the Perl script `keepalived` into the Checkmk agent local check
      directory (typically `/usr/lib/check_mk_agent/local`) and make it executable.
-  4. Restart the keepalived service with `systemctl restart keepalived.service`.
+  4. Restart the keepalived service with `systemctl restart keepalived.service`
+     for systemd, or `rc-service keepalived restart` for openrc.
 
 The checks should now appear in the Checkmk console, one for each VRRP instance.
 
