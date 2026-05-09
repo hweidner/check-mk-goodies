@@ -2,9 +2,9 @@
 
 The autopb script automatically creates hosts in Checkmk when
 [piggyback](https://docs.checkmk.com/latest/en/piggyback.html) data
-is available. It supports only the Checkmk Raw edition, version 2.1-2.3
+is available. It supports only the Checkmk Raw edition, version 2.1-2.4
 (originally developed with 2.1.0p14 and also tested with current 2.2 and 2.3
-versions).
+versions). Tests under Checkmk 2.5 are in progress.
 
 This is very basically what the
 [Checkmk Dynamic Configuration Daemon (DCD)](https://docs.checkmk.com/latest/en/dcd.html)
