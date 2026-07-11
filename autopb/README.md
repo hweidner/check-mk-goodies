@@ -2,14 +2,14 @@
 
 The autopb script automatically creates hosts in Checkmk when
 [piggyback](https://docs.checkmk.com/latest/en/piggyback.html) data
-is available. It supports only the Checkmk Raw edition, version 2.1-2.4
-(originally developed with 2.1.0p14 and also tested with current 2.2 and 2.3
-versions). Tests under Checkmk 2.5 are in progress.
+is available. It supports only the Checkmk Raw (now: Community) edition
+and can be used with all currently supported Checkmk versions,
+from 2.3.0 to 2.5.0.
 
 This is very basically what the
 [Checkmk Dynamic Configuration Daemon (DCD)](https://docs.checkmk.com/latest/en/dcd.html)
-and its piggyback connector does, which is only available in the Enterprise, Cloud
-and Managed Services editions.
+and its piggyback connector does, which is only available in the Enterprise (Pro),
+Cloud (Ultimate) and Managed Services (UltimateMT) editions.
 
 In Checkmk, many buildin checks create piggyback data. Examples are the the
 special agents for VMware, Proxmox VE or Kubernetes, or the agent plugin for Docker.
